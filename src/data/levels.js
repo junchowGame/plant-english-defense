@@ -7,6 +7,11 @@ const plantTarget = {
   y: 63,
 };
 
+const peashooterTarget = {
+  ...plantTarget,
+  assetId: "char_plant_peashooter_idle",
+};
+
 const zombieTarget = {
   id: "zombie-main",
   label: "Zombie",
@@ -56,7 +61,7 @@ export const levels = [
         guideText: "Tap the plant",
         correctOptionId: "plant-main",
         learnedPhraseIds: ["hello", "plant"],
-        stageTargets: [plantTarget, zombieTarget, wordCard("hello-hint", "Hello", 52, 28)],
+        stageTargets: [peashooterTarget, zombieTarget, wordCard("hello-hint", "Hello", 52, 28)],
       },
       {
         id: "1-2",
@@ -65,9 +70,9 @@ export const levels = [
         promptAudioId: "vo_prompt_drag_hi_to_the_plant",
         guideText: "Drag “Hi” to the plant",
         learnedPhraseIds: ["hi", "plant"],
-        stageTargets: [plantTarget, zombieTarget],
+        stageTargets: [peashooterTarget, zombieTarget],
         draggables: [{ id: "drag-hi", label: "Hi", kind: "word", assetId: "vo_word_hi" }],
-        dropZones: [{ id: "plant-zone", label: "Drop to Plant", kind: "drop-zone", x: 33, y: 42 }],
+        dropZones: [{ id: "plant-zone", label: "Drop Hi Here", kind: "drop-zone", x: 33, y: 42 }],
         correctPairs: { "drag-hi": "plant-zone" },
       },
       {

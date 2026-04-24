@@ -344,6 +344,10 @@
   background-image: url("../assets/images/characters/char_plant_peashooter_attack.png");
 }
 
+.cmp-battle-stage.is-attacking .stage-object.plant-main .stage-sprite[data-asset-id="char_plant_peashooter_idle"]::before {
+  background-image: url("../assets/images/characters/char_plant_peashooter_attack.png");
+}
+
 .stage-sprite[data-asset-id="char_plant_wallnut_idle"]::before {
   background-image: url("../assets/images/characters/char_plant_wallnut_idle.png");
 }
