@@ -1,21 +1,25 @@
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   font-family: var(--font-body);
   background:
     radial-gradient(circle at top left, rgba(255, 214, 82, 0.55), transparent 28%),
     radial-gradient(circle at bottom right, rgba(91, 191, 126, 0.48), transparent 22%),
     linear-gradient(180deg, #cdeeff 0%, #fdf8e8 54%, #ebf7dc 100%);
   color: var(--color-ink-900);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
 }
 
 #app {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .app-shell {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: var(--space-20);
 }
@@ -23,18 +27,19 @@ body {
 .app-frame {
   position: relative;
   width: min(100%, var(--layout-max-width));
-  min-height: min(calc(100vh - 40px), var(--layout-min-height));
+  min-height: auto;
+  aspect-ratio: 4 / 3;
   background: rgba(255, 250, 240, 0.62);
   border-radius: 36px;
   box-shadow: 0 30px 80px rgba(45, 98, 87, 0.22);
-  overflow: hidden;
+  overflow: visible;
   backdrop-filter: blur(10px);
 }
 
 .page-shell {
   position: relative;
   width: 100%;
-  min-height: min(calc(100vh - 40px), var(--layout-min-height));
+  min-height: 100%;
   padding: var(--space-28);
 }
 
@@ -92,6 +97,6 @@ body {
 
   .app-frame,
   .page-shell {
-    min-height: calc(100vh - 24px);
+    min-height: auto;
   }
 }

@@ -8,6 +8,7 @@ Original prompt: 你现在是这个项目的前端实现负责人，同时需要
 - Static module import check passed through Node ESM import.
 - Added GitHub Pages deployment support with workflow, `.nojekyll`, and repository ignore rules.
 - Rewrote README local-run instructions to use a Node static server and documented Pages deployment flow.
+- Fixed iPad scroll and 4:3 frame sizing, copied selected source art into `assets/images`, and mapped backgrounds/plant/zombie/sun/projectile sprites through CSS asset IDs.
 
 TODO
 - Verify the full route flow in a browser.

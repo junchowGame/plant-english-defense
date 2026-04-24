@@ -246,21 +246,15 @@
 
 .cmp-battle-stage {
   position: relative;
-  min-height: 650px;
+  min-height: clamp(430px, 50vw, 650px);
   background:
-    linear-gradient(180deg, #7ecfff 0%, #dff4ff 46%, #9fe17a 46%, #6aba55 100%);
+    linear-gradient(90deg, rgba(255, 250, 240, 0.16), rgba(255, 250, 240, 0.06)),
+    url("../assets/images/backgrounds/bg_battle_yard_day.jpg") center / cover no-repeat;
   overflow: hidden;
 }
 
 .cmp-battle-stage::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 142px;
-  height: 28px;
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.28) 0 8%, transparent 8% 16%, rgba(255, 255, 255, 0.18) 16% 24%, transparent 24% 32%, rgba(255, 255, 255, 0.2) 32% 40%, transparent 40% 48%, rgba(255, 255, 255, 0.22) 48% 56%, transparent 56% 64%, rgba(255, 255, 255, 0.18) 64% 72%, transparent 72% 80%, rgba(255, 255, 255, 0.2) 80% 88%, transparent 88% 100%);
+  display: none;
 }
 
 .battle-stage-ground {
@@ -290,6 +284,21 @@
   box-shadow: var(--shadow-soft);
 }
 
+.stage-sprite::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+
+.stage-sprite[data-asset-id] > span {
+  position: relative;
+  z-index: 1;
+}
+
 .stage-object.plant-main .stage-sprite,
 .stage-object.plant .stage-sprite {
   width: 180px;
@@ -300,6 +309,55 @@
     radial-gradient(circle at 30% 74%, #5fba4e 0 20%, transparent 21%),
     radial-gradient(circle at 72% 74%, #4ea746 0 20%, transparent 21%),
     linear-gradient(180deg, #7dd15b 0%, #3d9e49 100%);
+}
+
+.stage-object.plant-main .stage-sprite[data-asset-id],
+.stage-object.plant .stage-sprite[data-asset-id],
+.stage-object.zombie-main .stage-sprite[data-asset-id],
+.stage-object.zombie .stage-sprite[data-asset-id],
+.stage-object.sun .stage-sprite[data-asset-id] {
+  background: transparent;
+  box-shadow: none;
+}
+
+.stage-object.plant-main .stage-sprite[data-asset-id] > span,
+.stage-object.plant .stage-sprite[data-asset-id] > span,
+.stage-object.zombie-main .stage-sprite[data-asset-id] > span,
+.stage-object.zombie .stage-sprite[data-asset-id] > span,
+.stage-object.sun .stage-sprite[data-asset-id] > span {
+  display: none;
+}
+
+.stage-sprite[data-asset-id="char_plant_sunflower_idle"]::before {
+  background-image: url("../assets/images/characters/char_plant_sunflower_idle.png");
+}
+
+.stage-sprite[data-asset-id="char_plant_sunflower_happy"]::before {
+  background-image: url("../assets/images/characters/char_plant_sunflower_happy.png");
+}
+
+.stage-sprite[data-asset-id="char_plant_peashooter_idle"]::before {
+  background-image: url("../assets/images/characters/char_plant_peashooter_idle.png");
+}
+
+.stage-sprite[data-asset-id="char_plant_peashooter_attack"]::before {
+  background-image: url("../assets/images/characters/char_plant_peashooter_attack.png");
+}
+
+.stage-sprite[data-asset-id="char_plant_wallnut_idle"]::before {
+  background-image: url("../assets/images/characters/char_plant_wallnut_idle.png");
+}
+
+.stage-sprite[data-asset-id="char_zombie_basic_idle"]::before {
+  background-image: url("../assets/images/characters/char_zombie_basic_idle.png");
+}
+
+.stage-object.zombie-main.is-hit .stage-sprite[data-asset-id="char_zombie_basic_idle"]::before {
+  background-image: url("../assets/images/characters/char_zombie_basic_hit.png");
+}
+
+.stage-sprite[data-asset-id="obj_sun"]::before {
+  background-image: url("../assets/images/objects/obj_sun.png");
 }
 
 .stage-object.zombie-main .stage-sprite,
@@ -377,10 +435,10 @@
   position: absolute;
   left: 240px;
   top: 330px;
-  width: 34px;
+  width: 56px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(180deg, #b2ff9f, #45b44f);
+  background: url("../assets/images/effects/pea_bullet.png") center / contain no-repeat;
   opacity: 0;
 }
 
