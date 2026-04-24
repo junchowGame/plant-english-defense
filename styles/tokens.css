@@ -1,0 +1,51 @@
+:root {
+  --color-brand-green-700: #2f9a5b;
+  --color-brand-green-500: #56c271;
+  --color-brand-green-300: #8de2a1;
+  --color-sun-500: #ffd558;
+  --color-sun-300: #ffe692;
+  --color-sky-500: #8cd0ff;
+  --color-sky-300: #d6efff;
+  --color-cream-100: #fffaf0;
+  --color-cream-200: #f7efd8;
+  --color-ink-900: #24414d;
+  --color-ink-700: #4d6975;
+  --color-danger-400: #ff8e8e;
+  --color-danger-200: #ffd3d3;
+  --color-success-200: #d9f8df;
+  --color-overlay: rgba(36, 65, 77, 0.38);
+  --color-white: #ffffff;
+
+  --font-display: "Avenir Next Rounded", "Trebuchet MS", "Arial Rounded MT Bold", "PingFang SC", sans-serif;
+  --font-body: "Avenir Next Rounded", "Trebuchet MS", "PingFang SC", sans-serif;
+
+  --font-size-page-title: 3.25rem;
+  --font-size-panel-title: 2.1rem;
+  --font-size-task: 1.95rem;
+  --font-size-button: 1.55rem;
+  --font-size-body: 1.15rem;
+  --font-size-caption: 1rem;
+
+  --space-4: 0.25rem;
+  --space-8: 0.5rem;
+  --space-12: 0.75rem;
+  --space-16: 1rem;
+  --space-20: 1.25rem;
+  --space-24: 1.5rem;
+  --space-28: 1.75rem;
+  --space-32: 2rem;
+  --space-40: 2.5rem;
+  --space-48: 3rem;
+
+  --radius-card: 20px;
+  --radius-button: 24px;
+  --radius-panel: 28px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 18px 32px rgba(84, 127, 120, 0.18);
+  --shadow-soft: 0 10px 20px rgba(78, 102, 109, 0.14);
+  --shadow-press: inset 0 6px 0 rgba(255, 255, 255, 0.28);
+
+  --layout-max-width: 1366px;
+  --layout-min-height: 1024px;
+}
