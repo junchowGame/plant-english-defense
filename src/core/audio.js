@@ -2,6 +2,7 @@ import { getPhrase } from "../data/phrases.js";
 
 export function createAudioManager(getState) {
   let audioContext = null;
+  let lastUtterance = null;
 
   function canPlayVoice() {
     const state = getState();
@@ -13,15 +14,48 @@ export function createAudioManager(getState) {
     return state.save.settings.masterAudioEnabled;
   }
 
+  function getAudioContext() {
+    if (!("AudioContext" in window || "webkitAudioContext" in window)) {
+      return null;
+    }
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    audioContext = audioContext ?? new AudioCtx();
+    return audioContext;
+  }
+
+  function unlockAudio() {
+    const context = getAudioContext();
+    if (context?.state === "suspended") {
+      context.resume();
+    }
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.resume();
+      window.speechSynthesis.getVoices();
+    }
+  }
+
+  function pickEnglishVoice() {
+    if (!("speechSynthesis" in window)) {
+      return null;
+    }
+    return window.speechSynthesis.getVoices().find((voice) => voice.lang?.toLowerCase().startsWith("en")) ?? null;
+  }
+
   function speakText(text) {
     if (!text || !canPlayVoice() || !("speechSynthesis" in window)) {
       return;
     }
+    unlockAudio();
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
     utterance.rate = 0.88;
     utterance.pitch = 1.18;
+    const voice = pickEnglishVoice();
+    if (voice) {
+      utterance.voice = voice;
+    }
+    lastUtterance = utterance;
     window.speechSynthesis.speak(utterance);
   }
 
@@ -30,8 +64,13 @@ export function createAudioManager(getState) {
       return;
     }
 
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    audioContext = audioContext ?? new AudioCtx();
+    const context = getAudioContext();
+    if (!context) {
+      return;
+    }
+    if (context.state === "suspended") {
+      context.resume();
+    }
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -45,12 +84,17 @@ export function createAudioManager(getState) {
   }
 
   return {
+    unlock() {
+      unlockAudio();
+    },
     playPromptByText(text) {
+      unlockAudio();
       playTone(480, 0.08);
       speakText(text);
     },
     playPhrase(phraseId, fallbackText = "") {
       const phrase = getPhrase(phraseId);
+      unlockAudio();
       playTone(520, 0.08);
       speakText(phrase.text || fallbackText);
     },
@@ -68,6 +112,7 @@ export function createAudioManager(getState) {
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
+      lastUtterance = null;
     },
   };
 }

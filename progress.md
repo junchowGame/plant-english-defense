@@ -9,6 +9,7 @@ Original prompt: 你现在是这个项目的前端实现负责人，同时需要
 - Added GitHub Pages deployment support with workflow, `.nojekyll`, and repository ignore rules.
 - Rewrote README local-run instructions to use a Node static server and documented Pages deployment flow.
 - Fixed iPad scroll and 4:3 frame sizing, copied selected source art into `assets/images`, and mapped backgrounds/plant/zombie/sun/projectile sprites through CSS asset IDs.
+- Reworked drag cards to use document-level pointer tracking, added the shovel card background asset, and made prompt playback explicitly unlock browser audio/speech on each click.
 
 TODO
 - Verify the full route flow in a browser.

@@ -121,6 +121,7 @@ export function createApp(root) {
     if (!question) {
       return;
     }
+    audio.unlock();
     audio.playPromptByText(question.promptText);
   }
 
@@ -129,6 +130,7 @@ export function createApp(root) {
     if (!question) {
       return;
     }
+    audio.unlock();
     audio.playPhrase(question.phraseId, question.exampleTextOverride ?? question.promptText);
   }
 
@@ -340,6 +342,7 @@ export function createApp(root) {
     }
 
     const clickHandler = async (event) => {
+      audio.unlock();
       const target = event.target.closest("[data-action]");
       if (!target) {
         return;

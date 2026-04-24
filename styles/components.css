@@ -224,20 +224,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 130px;
+  width: 152px;
   min-height: 88px;
   padding: var(--space-16);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: var(--shadow-soft);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02)),
+    url("../assets/images/ui/card_shovel_bg.png") center / 100% 100% no-repeat;
+  box-shadow: 0 12px 22px rgba(36, 65, 77, 0.2);
   font-size: 1.4rem;
   font-weight: 900;
+  color: #24414d;
   touch-action: none;
+  user-select: none;
+  cursor: grab;
 }
 
 .drag-card.is-dragging {
   z-index: 20;
   transform: scale(1.04);
+  cursor: grabbing;
 }
 
 .drag-card.is-matched {

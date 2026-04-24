@@ -10,21 +10,35 @@ export function attachDragSystem({ root, onDrop, onHover }) {
     let offsetX = 0;
     let offsetY = 0;
 
-    const onPointerMove = (event) => {
-      if (pointerId !== event.pointerId || !originRect) {
-        return;
-      }
-
+    const moveNode = (event) => {
       const left = event.clientX - offsetX;
       const top = event.clientY - offsetY;
       node.style.position = "fixed";
       node.style.left = `${left}px`;
       node.style.top = `${top}px`;
+      node.style.width = `${originRect.width}px`;
+      node.style.height = `${originRect.height}px`;
       node.style.margin = "0";
       node.style.zIndex = "60";
       node.classList.add("is-dragging");
+    };
 
+    const getDropZoneAtPoint = (event) => {
+      node.style.pointerEvents = "none";
       const hoveredZone = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-dropzone-id]");
+      node.style.pointerEvents = "";
+      return hoveredZone;
+    };
+
+    const onPointerMove = (event) => {
+      if (pointerId !== event.pointerId || !originRect) {
+        return;
+      }
+
+      event.preventDefault();
+      moveNode(event);
+
+      const hoveredZone = getDropZoneAtPoint(event);
       onHover(hoveredZone?.dataset.dropzoneId ?? null);
     };
 
@@ -32,8 +46,11 @@ export function attachDragSystem({ root, onDrop, onHover }) {
       node.style.position = "";
       node.style.left = "";
       node.style.top = "";
+      node.style.width = "";
+      node.style.height = "";
       node.style.margin = "";
       node.style.zIndex = "";
+      node.style.pointerEvents = "";
       node.classList.remove("is-dragging");
       onHover(null);
     };
@@ -43,7 +60,8 @@ export function attachDragSystem({ root, onDrop, onHover }) {
         return;
       }
 
-      const hoveredZone = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-dropzone-id]");
+      event.preventDefault();
+      const hoveredZone = getDropZoneAtPoint(event);
       const zoneId = hoveredZone?.dataset.dropzoneId ?? null;
       const success = zoneId ? onDrop({ itemId, zoneId }) : false;
 
@@ -51,7 +69,21 @@ export function attachDragSystem({ root, onDrop, onHover }) {
         resetPosition();
       }
 
-      node.releasePointerCapture(pointerId);
+      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointercancel", onPointerCancel);
+      pointerId = null;
+      originRect = null;
+    };
+
+    const onPointerCancel = (event) => {
+      if (pointerId !== event.pointerId) {
+        return;
+      }
+      resetPosition();
+      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointercancel", onPointerCancel);
       pointerId = null;
       originRect = null;
     };
@@ -65,19 +97,19 @@ export function attachDragSystem({ root, onDrop, onHover }) {
       originRect = startRect();
       offsetX = event.clientX - originRect.left;
       offsetY = event.clientY - originRect.top;
-      node.setPointerCapture(pointerId);
+      moveNode(event);
+      document.addEventListener("pointermove", onPointerMove, { passive: false });
+      document.addEventListener("pointerup", onPointerUp, { passive: false });
+      document.addEventListener("pointercancel", onPointerCancel, { passive: false });
     };
 
     node.addEventListener("pointerdown", onPointerDown);
-    node.addEventListener("pointermove", onPointerMove);
-    node.addEventListener("pointerup", onPointerUp);
-    node.addEventListener("pointercancel", resetPosition);
 
     cleanups.push(() => {
       node.removeEventListener("pointerdown", onPointerDown);
-      node.removeEventListener("pointermove", onPointerMove);
-      node.removeEventListener("pointerup", onPointerUp);
-      node.removeEventListener("pointercancel", resetPosition);
+      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointercancel", onPointerCancel);
     });
   });
 
