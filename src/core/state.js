@@ -42,6 +42,7 @@ export function createDefaultBattleState() {
     zombieHit: false,
     dragMatchedItemId: null,
     dragHoverZoneId: null,
+    selectedDragItemId: null,
     speakModalOpen: false,
     speakModalStatus: "idle",
     recordingSeconds: 0,

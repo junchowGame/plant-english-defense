@@ -11,14 +11,14 @@ export const battleScene = {
     const level = getLevelById(state.battle.levelId);
     const question = getCurrentQuestion(level, state.battle);
     const progress = getQuestionProgress(level, state.battle);
-    const audioText = state.save.settings.masterAudioEnabled ? "🔊" : "🔇";
+    const audioText = state.save.settings.masterAudioEnabled ? "Audio" : "Muted";
 
     return `
       <section class="page-shell scene-battle" data-page="page_battle">
         <div class="page-bg-decor"></div>
         <div class="page-content">
           <div class="battle-topbar">
-            <button class="icon-button" data-action="go-level-select">←</button>
+            <button class="icon-button" data-action="go-level-select" aria-label="Back">Back</button>
             <div class="battle-topbar-title">
               <strong>${level.title}</strong>
               <span>${level.subtitle}</span>
@@ -38,7 +38,7 @@ export const battleScene = {
                   ? "Almost!"
                   : "Garden Coach",
             body: state.battle.feedback,
-            actionButtonHtml: '<button class="task-action-button" data-action="play-prompt">再播一次</button>',
+            actionButtonHtml: '<button class="task-action-button" data-action="play-prompt">Play again</button>',
           })}
           ${SpeakModal({ question, battle: state.battle, uiText })}
         </div>

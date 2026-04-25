@@ -6,14 +6,17 @@ function renderDragCards(question, battle) {
       ${(question.draggables ?? [])
         .map((item) => {
           const isMatched = battle.dragMatchedItemId === item.id;
+          const isSelected = battle.selectedDragItemId === item.id;
           return `
-            <div
-              class="drag-card ${isMatched ? "is-matched" : ""}"
-              data-draggable-id="${item.id}"
+            <button
+              class="drag-card ${isMatched ? "is-matched" : ""} ${isSelected ? "is-selected" : ""}"
+              data-action="select-drag-item"
+              data-drag-item-id="${item.id}"
               data-asset-id="${item.assetId}"
+              ${isMatched ? "disabled" : ""}
             >
               ${item.label}
-            </div>
+            </button>
           `;
         })
         .join("")}
@@ -23,7 +26,11 @@ function renderDragCards(question, battle) {
 
 export function TaskPanel({ question, uiText, battle }) {
   const helperText =
-    question.type === "tap" ? uiText.battle.guideTap : question.type === "drag" ? uiText.battle.guideDrag : uiText.battle.guideSpeak;
+    question.type === "tap"
+      ? uiText.battle.guideTap
+      : question.type === "drag"
+        ? "Tap a card, then tap the glowing place."
+        : uiText.battle.guideSpeak;
   const examplePhrase = question.phraseId ? getPhrase(question.phraseId) : null;
 
   return `

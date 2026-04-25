@@ -235,19 +235,23 @@
   font-size: 1.4rem;
   font-weight: 900;
   color: #24414d;
-  touch-action: none;
+  touch-action: manipulation;
   user-select: none;
-  cursor: grab;
+  cursor: pointer;
 }
 
-.drag-card.is-dragging {
-  z-index: 20;
+.drag-card.is-selected {
+  outline: 5px solid rgba(255, 213, 88, 0.95);
+  outline-offset: 4px;
   transform: scale(1.04);
-  cursor: grabbing;
 }
 
 .drag-card.is-matched {
   opacity: 0.72;
+}
+
+.stage-object.drop-zone {
+  cursor: pointer;
 }
 
 .cmp-battle-stage {

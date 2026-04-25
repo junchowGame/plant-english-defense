@@ -4,42 +4,62 @@ export function attachDragSystem({ root, onDrop, onHover }) {
 
   draggables.forEach((node) => {
     const itemId = node.dataset.draggableId;
-    const startRect = () => node.getBoundingClientRect();
-    let pointerId = null;
+    let activeId = null;
+    let activeMode = null;
     let originRect = null;
+    let activeDropZone = null;
     let offsetX = 0;
     let offsetY = 0;
 
-    const moveNode = (event) => {
-      const left = event.clientX - offsetX;
-      const top = event.clientY - offsetY;
+    const getPoint = (event) => {
+      const touch =
+        activeId === null
+          ? event.changedTouches?.[0] ?? event.touches?.[0]
+          : [...(event.changedTouches ?? []), ...(event.touches ?? [])].find((item) => item.identifier === activeId);
+
+      if (touch) {
+        return {
+          id: touch.identifier,
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+        };
+      }
+
+      return {
+        id: event.pointerId ?? "mouse",
+        clientX: event.clientX,
+        clientY: event.clientY,
+      };
+    };
+
+    const moveNode = (point) => {
+      const left = point.clientX - offsetX;
+      const top = point.clientY - offsetY;
       node.style.position = "fixed";
       node.style.left = `${left}px`;
       node.style.top = `${top}px`;
       node.style.width = `${originRect.width}px`;
       node.style.height = `${originRect.height}px`;
       node.style.margin = "0";
-      node.style.zIndex = "60";
+      node.style.zIndex = "1000";
       node.classList.add("is-dragging");
     };
 
-    const getDropZoneAtPoint = (event) => {
+    const getDropZoneAtPoint = (point) => {
       node.style.pointerEvents = "none";
-      const hoveredZone = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-dropzone-id]");
+      const hoveredZone = document.elementFromPoint(point.clientX, point.clientY)?.closest("[data-dropzone-id]");
       node.style.pointerEvents = "";
       return hoveredZone;
     };
 
-    const onPointerMove = (event) => {
-      if (pointerId !== event.pointerId || !originRect) {
+    const setActiveDropZone = (zone) => {
+      if (activeDropZone === zone) {
         return;
       }
-
-      event.preventDefault();
-      moveNode(event);
-
-      const hoveredZone = getDropZoneAtPoint(event);
-      onHover(hoveredZone?.dataset.dropzoneId ?? null);
+      activeDropZone?.classList.remove("is-hover");
+      activeDropZone = zone;
+      activeDropZone?.classList.add("is-hover");
+      onHover(zone?.dataset.dropzoneId ?? null);
     };
 
     const resetPosition = () => {
@@ -52,64 +72,128 @@ export function attachDragSystem({ root, onDrop, onHover }) {
       node.style.zIndex = "";
       node.style.pointerEvents = "";
       node.classList.remove("is-dragging");
-      onHover(null);
+      setActiveDropZone(null);
     };
 
-    const onPointerUp = (event) => {
-      if (pointerId !== event.pointerId) {
+    const finishDrag = (event, shouldDrop) => {
+      const point = getPoint(event);
+      if (activeId !== point.id || !originRect) {
         return;
       }
 
       event.preventDefault();
-      const hoveredZone = getDropZoneAtPoint(event);
+      const hoveredZone = shouldDrop ? getDropZoneAtPoint(point) : null;
       const zoneId = hoveredZone?.dataset.dropzoneId ?? null;
       const success = zoneId ? onDrop({ itemId, zoneId }) : false;
 
       if (!success) {
         resetPosition();
+      } else {
+        setActiveDropZone(null);
       }
 
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerCancel);
-      pointerId = null;
+      removeMoveListeners();
+      activeId = null;
+      activeMode = null;
       originRect = null;
+      activeDropZone = null;
     };
 
-    const onPointerCancel = (event) => {
-      if (pointerId !== event.pointerId) {
+    const continueDrag = (event) => {
+      const point = getPoint(event);
+      if (activeId !== point.id || !originRect) {
         return;
       }
-      resetPosition();
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerCancel);
-      pointerId = null;
-      originRect = null;
-    };
 
-    const onPointerDown = (event) => {
-      if (event.button !== 0 && event.pointerType === "mouse") {
-        return;
-      }
       event.preventDefault();
-      pointerId = event.pointerId;
-      originRect = startRect();
-      offsetX = event.clientX - originRect.left;
-      offsetY = event.clientY - originRect.top;
-      moveNode(event);
-      document.addEventListener("pointermove", onPointerMove, { passive: false });
-      document.addEventListener("pointerup", onPointerUp, { passive: false });
-      document.addEventListener("pointercancel", onPointerCancel, { passive: false });
+      moveNode(point);
+      setActiveDropZone(getDropZoneAtPoint(point));
     };
 
-    node.addEventListener("pointerdown", onPointerDown);
+    function addMoveListeners() {
+      window.addEventListener("pointermove", continueDrag, { passive: false, capture: true });
+      window.addEventListener("pointerup", onPointerUp, { passive: false, capture: true });
+      window.addEventListener("pointercancel", onPointerCancel, { passive: false, capture: true });
+      window.addEventListener("touchmove", continueDrag, { passive: false, capture: true });
+      window.addEventListener("touchend", onTouchEnd, { passive: false, capture: true });
+      window.addEventListener("touchcancel", onTouchCancel, { passive: false, capture: true });
+      window.addEventListener("mousemove", continueDrag, { passive: false, capture: true });
+      window.addEventListener("mouseup", onMouseUp, { passive: false, capture: true });
+    }
+
+    function removeMoveListeners() {
+      window.removeEventListener("pointermove", continueDrag, { capture: true });
+      window.removeEventListener("pointerup", onPointerUp, { capture: true });
+      window.removeEventListener("pointercancel", onPointerCancel, { capture: true });
+      window.removeEventListener("touchmove", continueDrag, { capture: true });
+      window.removeEventListener("touchend", onTouchEnd, { capture: true });
+      window.removeEventListener("touchcancel", onTouchCancel, { capture: true });
+      window.removeEventListener("mousemove", continueDrag, { capture: true });
+      window.removeEventListener("mouseup", onMouseUp, { capture: true });
+    }
+
+    const beginDrag = (event, mode) => {
+      if (activeMode || node.classList.contains("is-matched")) {
+        return;
+      }
+      if (mode === "pointer" && event.button !== 0 && event.pointerType === "mouse") {
+        return;
+      }
+
+      event.preventDefault();
+      const point = getPoint(event);
+      activeMode = mode;
+      activeId = point.id;
+      originRect = node.getBoundingClientRect();
+      offsetX = point.clientX - originRect.left;
+      offsetY = point.clientY - originRect.top;
+      node.setPointerCapture?.(event.pointerId);
+      moveNode(point);
+      addMoveListeners();
+    };
+
+    function onPointerDown(event) {
+      beginDrag(event, "pointer");
+    }
+
+    function onTouchStart(event) {
+      beginDrag(event, "touch");
+    }
+
+    function onMouseDown(event) {
+      beginDrag(event, "mouse");
+    }
+
+    function onPointerUp(event) {
+      finishDrag(event, true);
+    }
+
+    function onPointerCancel(event) {
+      finishDrag(event, false);
+    }
+
+    function onTouchEnd(event) {
+      finishDrag(event, true);
+    }
+
+    function onTouchCancel(event) {
+      finishDrag(event, false);
+    }
+
+    function onMouseUp(event) {
+      finishDrag(event, true);
+    }
+
+    node.addEventListener("pointerdown", onPointerDown, { passive: false });
+    node.addEventListener("touchstart", onTouchStart, { passive: false });
+    node.addEventListener("mousedown", onMouseDown);
 
     cleanups.push(() => {
       node.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerCancel);
+      node.removeEventListener("touchstart", onTouchStart);
+      node.removeEventListener("mousedown", onMouseDown);
+      removeMoveListeners();
+      activeDropZone?.classList.remove("is-hover");
     });
   });
 

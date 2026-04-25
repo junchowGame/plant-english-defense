@@ -4,9 +4,10 @@ function renderStageTarget(target, question, battle) {
   const isMainZombie = target.id === "zombie-main";
   const isHover = battle.dragHoverZoneId && battle.dragHoverZoneId === target.id;
   const matchedItem = battle.dragMatchedItemId && question?.correctPairs?.[battle.dragMatchedItemId] === target.id;
+  const selectedItem = question?.draggables?.find((item) => item.id === battle.selectedDragItemId);
 
   const dataAttrs = isDropZone
-    ? `data-dropzone-id="${target.id}"`
+    ? `data-action="place-drag-item" data-dropzone-id="${target.id}"`
     : `data-action="tap-target" data-target-id="${target.id}"`;
 
   const classNames = [
@@ -20,7 +21,11 @@ function renderStageTarget(target, question, battle) {
     .filter(Boolean)
     .join(" ");
 
-  const label = matchedItem ? `<div class="speak-status-badge is-finished">${question.draggables?.find((item) => item.id === battle.dragMatchedItemId)?.label ?? "Matched"}</div>` : target.label;
+  const label = matchedItem
+    ? `<div class="speak-status-badge is-finished">${question.draggables?.find((item) => item.id === battle.dragMatchedItemId)?.label ?? "Matched"}</div>`
+    : isDropZone && selectedItem
+      ? `Tap here for ${selectedItem.label}`
+      : target.label;
 
   return `
     <div class="${classNames}" style="left:${target.x}%; top:${target.y}%;" ${dataAttrs}>
@@ -34,7 +39,7 @@ function renderStageTarget(target, question, battle) {
 export function BattleStage({ level, question, battle }) {
   const dragZones = question?.dropZones ?? [];
   const stageTargets = [...(question?.stageTargets ?? []), ...dragZones];
-  const bubbleText = question?.type === "drag" ? "Drag to the glowing place." : question?.type === "speak" ? "Open the mic and speak." : "Tap the correct target.";
+  const bubbleText = question?.type === "drag" ? "Tap a card, then tap the glowing place." : question?.type === "speak" ? "Open the mic and speak." : "Tap the correct target.";
 
   return `
     <section class="cmp_battle_stage cmp-battle-stage ${battle.isPlantGlow ? "is-plant-glow" : ""} ${battle.isAttacking ? "is-attacking" : ""} ${battle.isWrong ? "is-wrong" : ""}" data-component="cmp_battle_stage">

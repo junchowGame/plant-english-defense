@@ -3,6 +3,7 @@ import { getPhrase } from "../data/phrases.js";
 export function createAudioManager(getState) {
   let audioContext = null;
   let lastUtterance = null;
+  let currentAudio = null;
 
   function canPlayVoice() {
     const state = getState();
@@ -41,22 +42,80 @@ export function createAudioManager(getState) {
     return window.speechSynthesis.getVoices().find((voice) => voice.lang?.toLowerCase().startsWith("en")) ?? null;
   }
 
+  function speakWithLoadedVoice(utterance) {
+    const voice = pickEnglishVoice();
+    if (voice) {
+      try {
+        utterance.voice = voice;
+      } catch {}
+      try {
+        window.speechSynthesis.speak(utterance);
+      } catch {
+        lastUtterance = null;
+      }
+      return;
+    }
+
+    try {
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      lastUtterance = null;
+    }
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }
+
   function speakText(text) {
     if (!text || !canPlayVoice() || !("speechSynthesis" in window)) {
       return;
     }
     unlockAudio();
-    window.speechSynthesis.cancel();
+    try {
+      window.speechSynthesis.cancel();
+    } catch {
+      return;
+    }
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
     utterance.rate = 0.88;
     utterance.pitch = 1.18;
-    const voice = pickEnglishVoice();
-    if (voice) {
-      utterance.voice = voice;
-    }
     lastUtterance = utterance;
-    window.speechSynthesis.speak(utterance);
+    speakWithLoadedVoice(utterance);
+  }
+
+  function getPhraseByAudioId(audioId) {
+    if (!audioId) {
+      return null;
+    }
+    const normalizedId = audioId.replace(/^vo_/, "").replace(/_the_/g, "_");
+    return getPhrase(audioId).audio ? getPhrase(audioId) : getPhrase(normalizedId);
+  }
+
+  function resolveAudioSource(audioId) {
+    if (!audioId) {
+      return "";
+    }
+    const phrase = getPhraseByAudioId(audioId);
+    if (phrase?.audio) {
+      return phrase.audio;
+    }
+    return `assets/audio/${audioId}.mp3`;
+  }
+
+  function playAudioFile(audioId, fallbackText = "") {
+    if (!audioId || !canPlayVoice() || !("Audio" in window)) {
+      speakText(fallbackText);
+      return;
+    }
+
+    currentAudio?.pause();
+    currentAudio = new Audio(resolveAudioSource(audioId));
+    currentAudio.preload = "auto";
+    currentAudio.play().catch(() => {
+      currentAudio = null;
+      speakText(fallbackText);
+    });
   }
 
   function playTone(frequency = 440, duration = 0.18) {
@@ -92,11 +151,16 @@ export function createAudioManager(getState) {
       playTone(480, 0.08);
       speakText(text);
     },
+    playPrompt(question) {
+      unlockAudio();
+      playTone(480, 0.08);
+      playAudioFile(question?.promptAudioId, question?.promptText ?? "");
+    },
     playPhrase(phraseId, fallbackText = "") {
       const phrase = getPhrase(phraseId);
       unlockAudio();
       playTone(520, 0.08);
-      speakText(phrase.text || fallbackText);
+      playAudioFile(phrase.audio ? phraseId : "", phrase.text || fallbackText);
     },
     playFeedback(kind) {
       if (kind === "success") {
@@ -110,8 +174,12 @@ export function createAudioManager(getState) {
     },
     stopSpeech() {
       if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
+        try {
+          window.speechSynthesis.cancel();
+        } catch {}
       }
+      currentAudio?.pause();
+      currentAudio = null;
       lastUtterance = null;
     },
   };

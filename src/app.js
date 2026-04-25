@@ -10,7 +10,6 @@ import { battleScene } from "./scenes/battleScene.js";
 import { resultScene } from "./scenes/resultScene.js";
 import { parentScene } from "./scenes/parentScene.js";
 import { createRouter } from "./router.js";
-import { attachDragSystem } from "./systems/dragSystem.js";
 import { getCurrentQuestion, evaluateDragQuestion, evaluateTapQuestion } from "./systems/questionSystem.js";
 import { completeLevel, markLearnedPhrases } from "./systems/rewardSystem.js";
 import { beginRecordingSession, finishRecordingSession } from "./systems/speakSystem.js";
@@ -86,6 +85,7 @@ export function createApp(root) {
         feedback: state.battle.feedback,
         unlockedLevel: state.save.unlockedLevel,
         speakModalOpen: state.battle.speakModalOpen,
+        selectedDragItemId: state.battle.selectedDragItemId,
         progress: `${state.battle.questionIndex + 1}/${level?.questions?.length ?? 0}`,
         coordinateSystem: "percent-based positions with x from left to right and y from top to bottom",
       });
@@ -122,7 +122,7 @@ export function createApp(root) {
       return;
     }
     audio.unlock();
-    audio.playPromptByText(question.promptText);
+    audio.playPrompt(question);
   }
 
   function playSpeakExample() {
@@ -167,6 +167,7 @@ export function createApp(root) {
       autoPlayedQuestionId: null,
       dragMatchedItemId: null,
       dragHoverZoneId: null,
+      selectedDragItemId: null,
       isPlantGlow: false,
       isAttacking: false,
       isWrong: false,
@@ -232,12 +233,39 @@ export function createApp(root) {
         ...battle,
         dragMatchedItemId: itemId,
         dragHoverZoneId: null,
+        selectedDragItemId: null,
       }));
       schedule(() => resolveCorrectQuestion(question, { dragMatchedItemId: itemId }), 180);
       return true;
     }
     handleWrongAnswer();
     return false;
+  }
+
+  function selectDragItem(itemId) {
+    const question = getQuestion();
+    if (!question || question.type !== "drag" || !question.draggables?.some((item) => item.id === itemId)) {
+      return;
+    }
+    setBattle((battle) => ({
+      ...battle,
+      selectedDragItemId: itemId,
+      feedback: "Now tap the glowing place.",
+      feedbackMood: "info",
+    }));
+  }
+
+  function placeSelectedDragItem(zoneId) {
+    const itemId = store.getState().battle.selectedDragItemId;
+    if (!itemId) {
+      setBattle((battle) => ({
+        ...battle,
+        feedback: "Tap the card first.",
+        feedbackMood: "info",
+      }));
+      return;
+    }
+    handleDropAnswer({ itemId, zoneId });
   }
 
   function openSpeakModal() {
@@ -365,6 +393,10 @@ export function createApp(root) {
         playCurrentPrompt();
       } else if (action === "tap-target") {
         handleTapAnswer(target.dataset.targetId);
+      } else if (action === "select-drag-item") {
+        selectDragItem(target.dataset.dragItemId);
+      } else if (action === "place-drag-item") {
+        placeSelectedDragItem(target.dataset.dropzoneId);
       } else if (action === "open-speak-modal") {
         openSpeakModal();
       } else if (action === "close-speak-modal") {
@@ -392,19 +424,7 @@ export function createApp(root) {
 
     pageRoot.addEventListener("click", clickHandler);
 
-    let cleanupDrag = () => {};
-    if (store.getState().scene === "battle") {
-      cleanupDrag = attachDragSystem({
-        root: pageRoot,
-        onHover(zoneId) {
-          setBattle((battle) => ({ ...battle, dragHoverZoneId: zoneId }));
-        },
-        onDrop: handleDropAnswer,
-      });
-    }
-
     return () => {
-      cleanupDrag();
       pageRoot.removeEventListener("click", clickHandler);
     };
   }
