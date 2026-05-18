@@ -1,5 +1,11 @@
 # Plant English Defense
 
+## 关卡内互动系统
+
+完整 HTML 版入口：`level-interaction.html`
+
+GitHub Pages 发布后可通过仓库 Pages 地址访问根首页，也可以直接打开 `/level-interaction.html` 体验“加载 -> 图片点击记忆题 -> 过渡漫画 -> 院子保卫战 -> 关卡结算”的完整流程。
+
 一个面向 5 岁儿童、适配 iPad 横屏 Safari 的英语启蒙小游戏原型。当前版本使用 `HTML + CSS + 原生 JavaScript` 构建，支持首页、选关、主游戏、跟读弹层、结算页、家长设置页，以及本地存档、10 关示例数据和配置化内容管理。
 
 ## 如何本地运行

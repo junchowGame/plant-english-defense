@@ -16,6 +16,7 @@ export const homeScene = {
               <p class="scene-description">${uiText.home.description}</p>
               <div class="hero-actions">
                 ${MainButton({ label: uiText.home.start, action: "go-level-select" })}
+                <a class="cmp-main-button" href="./level-interaction.html">关卡内互动系统</a>
                 ${SecondaryButton({ label: uiText.home.parent, action: "go-parent-settings" })}
                 <button class="icon-button" data-action="toggle-master-audio">${audioLabel}</button>
               </div>
