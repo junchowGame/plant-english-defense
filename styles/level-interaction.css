@@ -763,6 +763,156 @@ h2 {
   box-shadow: var(--shadow);
 }
 
+.edit-mode #app {
+  overflow: visible;
+}
+
+.edit-mode [data-edit-id] {
+  outline: 1px dashed rgba(41, 111, 210, 0.28);
+  outline-offset: -2px;
+}
+
+.edit-mode .editor-selected {
+  outline: 2px solid rgba(30, 111, 235, 0.74);
+  outline-offset: 0;
+}
+
+.editor-panel {
+  position: absolute;
+  z-index: 200;
+  right: max(10px, env(safe-area-inset-right));
+  top: 10px;
+  width: min(300px, 34%);
+  max-height: calc(100% - 20px);
+  overflow: auto;
+  padding: 14px;
+  border: 2px solid rgba(38, 86, 137, 0.32);
+  border-radius: 12px;
+  background: rgba(255, 253, 241, 0.96);
+  color: #20364d;
+  box-shadow: 0 18px 44px rgba(20, 38, 56, 0.28);
+  font-size: 14px;
+  pointer-events: auto;
+}
+
+.editor-title {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 10px;
+}
+
+.editor-title strong {
+  font-size: 18px;
+}
+
+.editor-title span,
+.editor-panel p {
+  color: #5c6f82;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.editor-screen-tabs,
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.editor-screen-tabs {
+  margin-bottom: 10px;
+}
+
+.editor-panel button {
+  min-height: 30px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: #e6f1ff;
+  color: #214668;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.editor-panel button.is-active {
+  background: #3477d5;
+  color: #fff;
+}
+
+.editor-panel button:disabled {
+  opacity: 0.4;
+}
+
+.editor-panel label {
+  display: grid;
+  gap: 5px;
+  margin: 9px 0;
+  color: #294a68;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.editor-panel textarea,
+.editor-panel input {
+  width: 100%;
+  border: 1px solid rgba(55, 96, 135, 0.25);
+  border-radius: 8px;
+  padding: 7px 8px;
+  background: #fff;
+  color: #20364d;
+  font: 13px/1.35 "Microsoft YaHei", Arial, sans-serif;
+}
+
+.editor-panel textarea:disabled {
+  background: #edf2f6;
+  color: #8795a3;
+}
+
+.editor-outline {
+  position: absolute;
+  z-index: 190;
+  border: 2px solid #1d75ff;
+  background: rgba(29, 117, 255, 0.06);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7);
+  cursor: move;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.editor-outline span {
+  position: absolute;
+  left: 0;
+  top: -24px;
+  min-width: 52px;
+  height: 22px;
+  padding: 2px 7px;
+  border-radius: 7px 7px 0 0;
+  background: #1d75ff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.editor-outline span::before {
+  content: "拖动";
+}
+
+.editor-outline button {
+  position: absolute;
+  right: -9px;
+  bottom: -9px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 50%;
+  background: #1d75ff;
+  border: 2px solid #fff;
+  cursor: nwse-resize;
+}
+
+.editor-outline.hidden {
+  display: none;
+}
+
 @keyframes bob {
   0%,
   100% {

@@ -9,83 +9,83 @@
   <body>
     <main id="app" aria-label="关卡内互动系统">
       <section class="stage screen loading is-active" data-screen="loading">
-        <button class="icon-btn exit-btn" data-action="pause" aria-label="暂停">×</button>
-        <div class="loading-copy">
-          <p class="eyebrow">Level 1</p>
-          <h1>植物英语小队</h1>
-          <p>听一听，点一点，再用你的声音保护小院。</p>
+        <button class="icon-btn exit-btn" data-action="pause" data-edit-id="loading-exit" aria-label="暂停">×</button>
+        <div class="loading-copy" data-edit-id="loading-copy">
+          <p class="eyebrow" data-edit-id="loading-level">Level 1</p>
+          <h1 data-edit-id="loading-title">植物英语小队</h1>
+          <p data-edit-id="loading-desc">听一听，点一点，再用你的声音保护小院。</p>
         </div>
-        <img class="load-ill" src="./public/assets/level-interaction/ui/ui_load_ill_001.png" alt="" />
-        <div class="load-panel">
+        <img class="load-ill" data-edit-id="loading-illustration" src="./public/assets/level-interaction/ui/ui_load_ill_001.png" alt="" />
+        <div class="load-panel" data-edit-id="loading-controls">
           <div class="load-bar" aria-label="加载进度">
             <span id="loadFill"></span>
           </div>
-          <button class="primary-btn" data-action="start-click">开始</button>
+          <button class="primary-btn" data-action="start-click" data-edit-id="start-click-button">开始</button>
         </div>
       </section>
 
       <section class="stage screen click-game" data-screen="click">
-        <button class="icon-btn exit-btn" data-action="pause" aria-label="暂停">×</button>
-        <div class="top-hud">
+        <button class="icon-btn exit-btn" data-action="pause" data-edit-id="click-exit" aria-label="暂停">×</button>
+        <div class="top-hud" data-edit-id="click-top-hud">
           <div>
-            <p class="eyebrow">Listen and choose</p>
-            <h2 id="clickPrompt">听声音，选择图片</h2>
+            <p class="eyebrow" data-edit-id="click-eyebrow">Listen and choose</p>
+            <h2 id="clickPrompt" data-edit-id="click-prompt">听声音，选择图片</h2>
           </div>
-          <div class="progress-pill"><span id="clickRound">1</span>/6</div>
+          <div class="progress-pill" data-edit-id="click-progress"><span id="clickRound">1</span>/6</div>
         </div>
-        <div class="context-panel">
-          <img src="./public/assets/level-interaction/art/art_dialogue_thank_001.png" alt="" />
+        <div class="context-panel" data-edit-id="click-context-panel">
+          <img data-edit-id="click-context-image" src="./public/assets/level-interaction/art/art_dialogue_thank_001.png" alt="" />
         </div>
-        <div id="cardRow" class="card-row" aria-live="polite"></div>
-        <div class="bottom-actions">
-          <button class="round-btn" data-action="replay-click" aria-label="重播英文">
+        <div id="cardRow" class="card-row" data-edit-id="click-card-row" aria-live="polite"></div>
+        <div class="bottom-actions" data-edit-id="click-bottom-actions">
+          <button class="round-btn" data-action="replay-click" data-edit-id="click-replay-button" aria-label="重播英文">
             <span class="speaker-mark"></span>
           </button>
         </div>
       </section>
 
       <section class="stage screen comic" data-screen="comic">
-        <button class="icon-btn exit-btn" data-action="pause" aria-label="暂停">×</button>
-        <div class="comic-strip">
-          <figure>
-            <img src="./public/assets/level-interaction/art/art_comic_transition_001.png" alt="" />
+        <button class="icon-btn exit-btn" data-action="pause" data-edit-id="comic-exit" aria-label="暂停">×</button>
+        <div class="comic-strip" data-edit-id="comic-strip">
+          <figure data-edit-id="comic-frame-1">
+            <img data-edit-id="comic-image-1" src="./public/assets/level-interaction/art/art_comic_transition_001.png" alt="" />
           </figure>
-          <figure>
-            <img src="./public/assets/level-interaction/art/art_comic_transition_002.png" alt="" />
+          <figure data-edit-id="comic-frame-2">
+            <img data-edit-id="comic-image-2" src="./public/assets/level-interaction/art/art_comic_transition_002.png" alt="" />
           </figure>
         </div>
-        <div class="comic-caption">
-          <h2>声音准备好了，小院也准备好了。</h2>
-          <button class="primary-btn" data-action="start-yard">去小院</button>
+        <div class="comic-caption" data-edit-id="comic-caption">
+          <h2 data-edit-id="comic-title">声音准备好了，小院也准备好了。</h2>
+          <button class="primary-btn" data-action="start-yard" data-edit-id="start-yard-button">去小院</button>
         </div>
       </section>
 
       <section class="stage screen yard" data-screen="yard">
-        <button class="icon-btn exit-btn" data-action="pause" aria-label="暂停">×</button>
-        <div class="yard-hud">
-          <div class="sun-counter">
-            <img src="./public/assets/level-interaction/art/icon_sys_sun_001_256.png" alt="" />
+        <button class="icon-btn exit-btn" data-action="pause" data-edit-id="yard-exit" aria-label="暂停">×</button>
+        <div class="yard-hud" data-edit-id="yard-hud">
+          <div class="sun-counter" data-edit-id="sun-counter">
+            <img data-edit-id="sun-icon" src="./public/assets/level-interaction/art/icon_sys_sun_001_256.png" alt="" />
             <span id="sunCount">0</span>
           </div>
-          <div class="repeat-count">跟读 <span id="speakCount">0</span>/5</div>
+          <div class="repeat-count" data-edit-id="speak-counter">跟读 <span id="speakCount">0</span>/5</div>
         </div>
-        <div class="speak-panel">
-          <p class="eyebrow">Say it aloud</p>
-          <h2 id="yardPrompt">Say: Hello!</h2>
-          <p id="yardHint">听完后按住麦克风说一遍。</p>
+        <div class="speak-panel" data-edit-id="speak-panel">
+          <p class="eyebrow" data-edit-id="yard-eyebrow">Say it aloud</p>
+          <h2 id="yardPrompt" data-edit-id="yard-prompt">Say: Hello!</h2>
+          <p id="yardHint" data-edit-id="yard-hint">听完后按住麦克风说一遍。</p>
         </div>
-        <div id="yardField" class="yard-field">
-          <div class="slots" id="slots"></div>
-          <div id="plantSprite" class="sprite plant-sprite hidden" data-sprite="peashooter-idle"></div>
-          <div id="zombieSprite" class="sprite zombie-sprite entering" data-sprite="bucket-spawn"></div>
-          <img id="projectile" class="projectile hidden" src="./public/assets/level-interaction/art/icon_sys_projectile_001.png" alt="" />
-          <img id="sunFly" class="sun-fly hidden" src="./public/assets/level-interaction/art/icon_sys_sun_001_256.png" alt="" />
+        <div id="yardField" class="yard-field" data-edit-id="yard-field">
+          <div class="slots" id="slots" data-edit-id="yard-slots"></div>
+          <div id="plantSprite" class="sprite plant-sprite hidden" data-edit-id="plant-sprite" data-sprite="peashooter-idle"></div>
+          <div id="zombieSprite" class="sprite zombie-sprite entering" data-edit-id="zombie-sprite" data-sprite="bucket-spawn"></div>
+          <img id="projectile" class="projectile hidden" data-edit-id="projectile" src="./public/assets/level-interaction/art/icon_sys_projectile_001.png" alt="" />
+          <img id="sunFly" class="sun-fly hidden" data-edit-id="sun-fly" src="./public/assets/level-interaction/art/icon_sys_sun_001_256.png" alt="" />
         </div>
-        <div class="yard-actions">
-          <button class="round-btn small" data-action="replay-yard" aria-label="重播英文">
+        <div class="yard-actions" data-edit-id="yard-actions">
+          <button class="round-btn small" data-action="replay-yard" data-edit-id="yard-replay-button" aria-label="重播英文">
             <span class="speaker-mark"></span>
           </button>
-          <button id="micBtn" class="mic-btn" data-action="mic" aria-label="按住说话">
+          <button id="micBtn" class="mic-btn" data-action="mic" data-edit-id="mic-button" aria-label="按住说话">
             <span class="mic-icon"></span>
           </button>
         </div>
@@ -93,35 +93,35 @@
 
       <section class="stage screen result" data-screen="result">
         <div class="result-mask"></div>
-        <div class="result-panel" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
-          <p class="eyebrow">Level complete</p>
-          <h2 id="resultTitle">Great!</h2>
-          <div id="stars" class="stars" aria-label="三星通关">
+        <div class="result-panel" data-edit-id="result-panel" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+          <p class="eyebrow" data-edit-id="result-eyebrow">Level complete</p>
+          <h2 id="resultTitle" data-edit-id="result-title">Great!</h2>
+          <div id="stars" class="stars" data-edit-id="result-stars" aria-label="三星通关">
             <span>★</span><span>★</span><span>★</span>
           </div>
-          <div class="result-sun">
-            <img src="./public/assets/level-interaction/art/icon_sys_sun_001_256.png" alt="" />
+          <div class="result-sun" data-edit-id="result-sun">
+            <img data-edit-id="result-sun-icon" src="./public/assets/level-interaction/art/icon_sys_sun_001_256.png" alt="" />
             <span>× <strong id="resultSun">5</strong></span>
           </div>
-          <div class="result-stats">
-            <span>图片正确率 <strong id="resultClickRate">100%</strong></span>
-            <span>跟读成功率 <strong>100%</strong></span>
+          <div class="result-stats" data-edit-id="result-stats">
+            <span data-edit-id="result-click-rate-label">图片正确率 <strong id="resultClickRate">100%</strong></span>
+            <span data-edit-id="result-speak-rate-label">跟读成功率 <strong>100%</strong></span>
           </div>
-          <div class="result-actions">
-            <button class="secondary-btn" data-action="map">回章节地图</button>
-            <button class="secondary-btn" data-action="restart">再玩一次</button>
-            <button class="primary-btn" data-action="next">下一关</button>
+          <div class="result-actions" data-edit-id="result-actions">
+            <button class="secondary-btn" data-action="map" data-edit-id="result-map-button">回章节地图</button>
+            <button class="secondary-btn" data-action="restart" data-edit-id="result-restart-button">再玩一次</button>
+            <button class="primary-btn" data-action="next" data-edit-id="result-next-button">下一关</button>
           </div>
         </div>
       </section>
 
       <div id="pauseModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
-        <div class="modal-panel">
-          <h2 id="pauseTitle">暂停一下</h2>
-          <p>现在离开不会保存本次进度。</p>
-          <div class="modal-actions">
-            <button class="secondary-btn" data-action="resume">继续</button>
-            <button class="primary-btn" data-action="map">回章节地图</button>
+        <div class="modal-panel" data-edit-id="pause-panel">
+          <h2 id="pauseTitle" data-edit-id="pause-title">暂停一下</h2>
+          <p data-edit-id="pause-desc">现在离开不会保存本次进度。</p>
+          <div class="modal-actions" data-edit-id="pause-actions">
+            <button class="secondary-btn" data-action="resume" data-edit-id="pause-resume-button">继续</button>
+            <button class="primary-btn" data-action="map" data-edit-id="pause-map-button">回章节地图</button>
           </div>
         </div>
       </div>
