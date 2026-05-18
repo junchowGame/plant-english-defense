@@ -88,7 +88,9 @@ button:disabled {
 }
 
 .comic {
-  background: linear-gradient(180deg, #f7e7bc, #9bd6e5 55%, #78bf6e);
+  background:
+    linear-gradient(180deg, rgba(255, 248, 214, 0.22), rgba(154, 216, 229, 0.16)),
+    url("../public/assets/level-interaction/ui/ui_click_bg_001.png") center / cover no-repeat;
 }
 
 .exit-btn {
@@ -418,19 +420,48 @@ h2 {
 
 .comic-strip {
   position: absolute;
-  inset: 8% 7% 28%;
+  inset: 6.5% 7% 25%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3%;
+  grid-template-rows: 1fr 1fr;
+  gap: min(2.4vw, 28px);
 }
 
 .comic-strip figure {
   margin: 0;
-  border: 8px solid #fff8d4;
-  border-radius: 20px;
-  box-shadow: var(--shadow);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
-  background: #fff8d4;
+  background: transparent;
+}
+
+.comic-panel {
+  opacity: 0;
+  animation-duration: 0.78s;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.18, 0.92, 0.22, 1);
+  will-change: transform, opacity;
+}
+
+.panel-top-left {
+  animation-name: comicInTopLeft;
+  animation-delay: 0.08s;
+}
+
+.panel-top-right {
+  animation-name: comicInTopRight;
+  animation-delay: 0.22s;
+}
+
+.panel-bottom-left {
+  animation-name: comicInBottomLeft;
+  animation-delay: 0.36s;
+}
+
+.panel-bottom-right {
+  animation-name: comicInBottomRight;
+  animation-delay: 0.5s;
 }
 
 .comic-strip img {
@@ -450,6 +481,10 @@ h2 {
   justify-content: space-between;
   gap: 18px;
   color: #20405e;
+}
+
+.comic .comic-caption h2 {
+  max-width: min(680px, 64%);
 }
 
 .yard-hud {
@@ -945,6 +980,50 @@ h2 {
   }
 }
 
+@keyframes comicInTopLeft {
+  from {
+    opacity: 0;
+    transform: translate(-42%, -38%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes comicInTopRight {
+  from {
+    opacity: 0;
+    transform: translate(42%, -38%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes comicInBottomLeft {
+  from {
+    opacity: 0;
+    transform: translate(-42%, 38%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes comicInBottomRight {
+  from {
+    opacity: 0;
+    transform: translate(42%, 38%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
 @keyframes cardJump {
   0%,
   100% {
@@ -1044,6 +1123,13 @@ h2 {
   to {
     opacity: 1;
     transform: scale(1) rotate(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comic-panel {
+    opacity: 1;
+    animation: none;
   }
 }
 

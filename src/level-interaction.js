@@ -100,6 +100,9 @@ function showScreen(name) {
   el.screens.forEach((screen) => {
     screen.classList.toggle("is-active", screen.dataset.screen === name);
   });
+  if (name === "comic") {
+    restartComicPanels();
+  }
   updateEditorScreenControls();
   queueEditorOutlineUpdate();
 }
@@ -363,7 +366,15 @@ async function completeClickGame() {
   showScreen("comic");
   window.setTimeout(() => {
     if (state.screen === "comic") startYard();
-  }, 2300);
+  }, 3300);
+}
+
+function restartComicPanels() {
+  document.querySelectorAll(".comic-panel").forEach((panel) => {
+    panel.style.animation = "none";
+    void panel.offsetWidth;
+    panel.style.animation = "";
+  });
 }
 
 function startYard() {
