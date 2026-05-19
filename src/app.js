@@ -349,6 +349,158 @@ export function createApp(root) {
     openScene("home");
   }
 
+  function showHomeToast(message) {
+    const pageRoot = root.querySelector(".yard-home");
+    const toast = pageRoot?.querySelector(".yard-toast");
+    if (!toast) {
+      return;
+    }
+    toast.textContent = message;
+    toast.classList.remove("hidden");
+    window.clearTimeout(showHomeToast.timer);
+    showHomeToast.timer = window.setTimeout(() => toast.classList.add("hidden"), 1600);
+  }
+
+  function playHomeEncourage() {
+    const text = "Hello! 一起守护小院吧！";
+    if (!("speechSynthesis" in window)) {
+      showHomeToast(text);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance("Hello! Let's guard the yard!");
+    utterance.lang = "en-US";
+    utterance.rate = 0.82;
+    utterance.pitch = 1.1;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function markStickerSeen() {
+    try {
+      localStorage.setItem("plant-english-defense.yard-home.sticker-seen.v1", "1");
+    } catch {
+      // localStorage may be unavailable in restricted browser contexts.
+    }
+    root.querySelector(".yard-new-badge")?.classList.add("hidden");
+    showHomeToast("贴纸册还在准备中");
+  }
+
+  function saveHomePlacement(id, x, y) {
+    try {
+      const key = "plant-english-defense.yard-home.placements.v1";
+      const current = JSON.parse(localStorage.getItem(key) || "{}");
+      current[id] = { x: Number(x.toFixed(2)), y: Number(y.toFixed(2)) };
+      localStorage.setItem(key, JSON.stringify(current));
+    } catch {
+      showHomeToast("这次位置没有保存成功");
+    }
+  }
+
+  function bindHomeDrag(pageRoot) {
+    const dragState = {
+      node: null,
+      id: "",
+      pointerId: null,
+      startLeft: 0,
+      startTop: 0,
+      offsetX: 0,
+      offsetY: 0,
+    };
+    const ring = pageRoot.querySelector(".yard-drop-ring");
+
+    function setPairPosition(node, left, top) {
+      node.style.left = `${left}%`;
+      node.style.top = `${top}%`;
+      const shadowClass = node.classList.contains("peashooter") ? ".plant-shadow" : ".zombie-shadow";
+      const shadow = node.classList.contains("yard-character") ? pageRoot.querySelector(shadowClass) : null;
+      if (shadow) {
+        shadow.style.left = `${left}%`;
+        shadow.style.top = `${top}%`;
+      }
+    }
+
+    function isValidPlacement(left, top) {
+      const inGrass = left >= 10 && left <= 70 && top >= 42 && top <= 88;
+      const blocksMainAction = left > 62 && top > 18 && top < 72;
+      return inGrass && !blocksMainAction;
+    }
+
+    function showDropRing(left, top, valid) {
+      if (!ring) return;
+      ring.classList.toggle("is-invalid", !valid);
+      ring.classList.remove("hidden");
+      ring.style.left = `${left}%`;
+      ring.style.top = `${top}%`;
+    }
+
+    function onPointerDown(event) {
+      const node = event.target.closest("[data-home-drag]");
+      if (!node) return;
+      event.preventDefault();
+      dragState.node = node;
+      dragState.id = node.dataset.homeDrag;
+      dragState.pointerId = event.pointerId;
+      dragState.startLeft = parseFloat(node.style.left) || 0;
+      dragState.startTop = parseFloat(node.style.top) || 0;
+      const rect = pageRoot.getBoundingClientRect();
+      const nodeRect = node.getBoundingClientRect();
+      dragState.offsetX = event.clientX - (nodeRect.left + nodeRect.width / 2);
+      dragState.offsetY = event.clientY - (nodeRect.top + nodeRect.height / 2);
+      node.classList.add("is-dragging");
+      if (node.dataset.dragSrc) {
+        node.src = node.dataset.dragSrc;
+      }
+      node.setPointerCapture?.(event.pointerId);
+      const left = ((event.clientX - dragState.offsetX - rect.left) / rect.width) * 100;
+      const top = ((event.clientY - dragState.offsetY - rect.top) / rect.height) * 100;
+      showDropRing(left, top, isValidPlacement(left, top));
+    }
+
+    function onPointerMove(event) {
+      if (!dragState.node || event.pointerId !== dragState.pointerId) return;
+      event.preventDefault();
+      const rect = pageRoot.getBoundingClientRect();
+      const left = Math.max(4, Math.min(94, ((event.clientX - dragState.offsetX - rect.left) / rect.width) * 100));
+      const top = Math.max(10, Math.min(92, ((event.clientY - dragState.offsetY - rect.top) / rect.height) * 100));
+      setPairPosition(dragState.node, left, top);
+      showDropRing(left, top, isValidPlacement(left, top));
+    }
+
+    function onPointerUp(event) {
+      if (!dragState.node || event.pointerId !== dragState.pointerId) return;
+      const node = dragState.node;
+      const left = parseFloat(node.style.left) || dragState.startLeft;
+      const top = parseFloat(node.style.top) || dragState.startTop;
+      node.classList.remove("is-dragging");
+      if (node.dataset.idleSrc) {
+        node.src = node.dataset.idleSrc;
+      }
+      ring?.classList.add("hidden");
+      if (isValidPlacement(left, top)) {
+        saveHomePlacement(dragState.id, left, top);
+        showHomeToast("摆好了");
+      } else {
+        setPairPosition(node, dragState.startLeft, dragState.startTop);
+        showHomeToast("放到草地里哦");
+      }
+      dragState.node = null;
+      dragState.id = "";
+      dragState.pointerId = null;
+    }
+
+    pageRoot.addEventListener("pointerdown", onPointerDown);
+    pageRoot.addEventListener("pointermove", onPointerMove);
+    pageRoot.addEventListener("pointerup", onPointerUp);
+    pageRoot.addEventListener("pointercancel", onPointerUp);
+
+    return () => {
+      pageRoot.removeEventListener("pointerdown", onPointerDown);
+      pageRoot.removeEventListener("pointermove", onPointerMove);
+      pageRoot.removeEventListener("pointerup", onPointerUp);
+      pageRoot.removeEventListener("pointercancel", onPointerUp);
+    };
+  }
+
   function nextLevel() {
     const level = getCurrentLevel() ?? getLevelById(store.getState().result?.levelId);
     if (level?.id < levels.length) {
@@ -389,6 +541,10 @@ export function createApp(root) {
         if (levelId) {
           startLevel(levelId);
         }
+      } else if (action === "home-open-stickers") {
+        markStickerSeen();
+      } else if (action === "home-play-encourage") {
+        playHomeEncourage();
       } else if (action === "play-prompt") {
         playCurrentPrompt();
       } else if (action === "tap-target") {
@@ -423,9 +579,11 @@ export function createApp(root) {
     };
 
     pageRoot.addEventListener("click", clickHandler);
+    const cleanupHomeDrag = pageRoot.classList.contains("yard-home") ? bindHomeDrag(pageRoot) : null;
 
     return () => {
       pageRoot.removeEventListener("click", clickHandler);
+      cleanupHomeDrag?.();
     };
   }
 
