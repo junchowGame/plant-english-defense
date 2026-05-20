@@ -14,8 +14,10 @@ Original prompt: 你现在是这个项目的前端实现负责人，同时需要
 - Verified in Chromium with a mocked missing-audio file path: Level 1 Task 1 advances to Task 1-2, clicking play prompt speaks "Drag Hi to the plant.", and dragging the Hi card to the plant zone advances to Task 1-3.
 - Reworked drag again for real touch devices: drag cards now listen to pointer, touch, and mouse events on the capture phase, use pointer capture when available, and were verified with Chromium touch emulation from Task 1-2 to Task 1-3.
 - Replaced drag gameplay with tap-to-place: drag cards are now normal buttons, the player taps a card and then taps the glowing target zone. Verified Level 1 Task 1-2 advances to Task 1-3 with click-only input.
+- Replaced the level-select page with the new fixed 4:3 level selection system: 10 slots in a 5x2 grid, resource-backed background/panels/cards, current/cleared/locked/disabled states, reward badges on levels 5 and 10, and transient hints for locked or unavailable slots.
 
 TODO
 - Verify the full route flow in a browser.
 - Re-run browser verification after any further drag/audio edits.
 - Confirm speech synthesis and microphone fallback behavior across Safari variants.
+- Added a `level-interaction.html?edit=1` in-page UI editor in progress: selectable `data-edit-id` targets, drag/resize geometry overrides, text/font edits, local image/background upload, and JSON import/export stored in localStorage.

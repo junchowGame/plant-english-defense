@@ -361,6 +361,30 @@ export function createApp(root) {
     showHomeToast.timer = window.setTimeout(() => toast.classList.add("hidden"), 1600);
   }
 
+  function showLevelHint(target, message, tone = "normal") {
+    const pageRoot = root.querySelector(".level-select-page");
+    const hint = pageRoot?.querySelector(".level-float-hint");
+    if (!pageRoot || !hint || !target) {
+      return;
+    }
+    const pageRect = pageRoot.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const left = ((targetRect.left + targetRect.width / 2 - pageRect.left) / pageRect.width) * 100;
+    const top = ((targetRect.top - pageRect.top) / pageRect.height) * 100 - 9;
+    hint.style.left = `${Math.max(14, Math.min(86, left))}%`;
+    hint.style.top = `${Math.max(11, top)}%`;
+    hint.querySelector("span").textContent = message;
+    hint.className = `level-float-hint is-visible${tone === "config" ? " is-config" : ""}`;
+    target.classList.remove("is-shaking");
+    void target.offsetWidth;
+    target.classList.add("is-shaking");
+    window.clearTimeout(showLevelHint.timer);
+    showLevelHint.timer = window.setTimeout(() => {
+      hint.classList.remove("is-visible", "is-config");
+      target.classList.remove("is-shaking");
+    }, 1500);
+  }
+
   function playHomeEncourage() {
     const text = "Hello! 一起守护小院吧！";
     if (!("speechSynthesis" in window)) {
@@ -545,6 +569,10 @@ export function createApp(root) {
         markStickerSeen();
       } else if (action === "home-play-encourage") {
         playHomeEncourage();
+      } else if (action === "level-locked") {
+        showLevelHint(target, "先完成前一关吧");
+      } else if (action === "level-unavailable") {
+        showLevelHint(target, "关卡还没准备好", "config");
       } else if (action === "play-prompt") {
         playCurrentPrompt();
       } else if (action === "tap-target") {
