@@ -653,3 +653,395 @@
     transform: translate(-52%, -50%);
   }
 }
+
+.unified-battle-topbar {
+  grid-template-columns: auto 1fr auto auto;
+}
+
+.unified-progress {
+  min-width: 92px;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--color-ink-700);
+  text-align: center;
+  font-weight: 900;
+}
+
+.unified-level-flow {
+  position: relative;
+  min-height: clamp(470px, 52vw, 640px);
+  margin-top: var(--space-16);
+  border-radius: var(--radius-panel);
+  background:
+    linear-gradient(90deg, rgba(255, 250, 240, 0.15), rgba(255, 250, 240, 0.04)),
+    url("../assets/images/backgrounds/bg_battle_yard_day.jpg") center / cover no-repeat;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.memory-phase {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--space-18);
+  padding: var(--space-24);
+}
+
+.memory-prompt-panel {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--space-18);
+  padding: var(--space-16) var(--space-20);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-soft);
+}
+
+.memory-prompt-panel span {
+  color: var(--color-ink-700);
+  font-weight: 800;
+}
+
+.memory-prompt-panel strong {
+  color: #2e6238;
+  font-size: clamp(1.6rem, 3.2vw, 2.8rem);
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.memory-card-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-20);
+  align-items: stretch;
+}
+
+.memory-choice-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  justify-items: center;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--space-20);
+  border: 0;
+  border-radius: 28px;
+  background: rgba(255, 253, 242, 0.9);
+  box-shadow: var(--shadow-card);
+  color: #355927;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+.memory-choice-card:active {
+  transform: translateY(2px) scale(0.985);
+}
+
+.memory-choice-card img {
+  max-width: 84%;
+  max-height: 270px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 10px rgba(45, 74, 40, 0.2));
+}
+
+.memory-choice-card strong {
+  margin-top: var(--space-12);
+  text-align: center;
+  font-size: clamp(1.35rem, 2.2vw, 2.2rem);
+  line-height: 1.05;
+  font-weight: 1000;
+}
+
+.memory-phase.is-wrong .memory-choice-card {
+  animation: memoryCardWrong 360ms ease;
+}
+
+.comic-phase {
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  gap: var(--space-14);
+  padding: var(--space-24);
+  background:
+    linear-gradient(180deg, rgba(255, 245, 206, 0.72), rgba(221, 245, 215, 0.7)),
+    url("../assets/images/backgrounds/bg_battle_yard_day.jpg") center / cover no-repeat;
+}
+
+.comic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: var(--space-16);
+}
+
+.comic-cell {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--space-16);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  animation: comicCellIn 460ms ease both;
+}
+
+.comic-cell:nth-child(2) {
+  animation-delay: 110ms;
+}
+
+.comic-cell:nth-child(3) {
+  animation-delay: 220ms;
+}
+
+.comic-cell:nth-child(4) {
+  animation-delay: 330ms;
+}
+
+.comic-cell::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 62%;
+  height: 74%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  transform: translate(-50%, -50%);
+}
+
+.comic-cell.plant-sun::before,
+.comic-cell.surprised::before {
+  background-image: url("../assets/images/characters/char_plant_peashooter_idle.png");
+}
+
+.comic-cell.shadow::before {
+  background-image: url("../assets/images/characters/char_zombie_basic_idle.png");
+  filter: brightness(0.35) opacity(0.6);
+}
+
+.comic-cell.ready::before {
+  background-image: url("../assets/images/characters/char_plant_peashooter_attack.png");
+}
+
+.comic-cell span {
+  position: relative;
+  z-index: 1;
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.84);
+  color: #355927;
+  font-weight: 900;
+}
+
+.comic-phase p {
+  margin: 0;
+  color: #355927;
+  text-align: center;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  font-weight: 900;
+}
+
+.comic-phase .task-action-button {
+  justify-self: center;
+}
+
+.defense-phase {
+  display: grid;
+  grid-template-columns: 1fr minmax(270px, 34%);
+  gap: var(--space-20);
+  padding: var(--space-20);
+}
+
+.defense-yard {
+  position: relative;
+  min-width: 0;
+  min-height: 100%;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(210, 240, 255, 0.12), rgba(255, 255, 255, 0.02)),
+    url("../assets/images/backgrounds/bg_battle_yard_day.jpg") center / cover no-repeat;
+  overflow: hidden;
+}
+
+.defense-plant,
+.defense-zombie {
+  position: absolute;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 10px rgba(36, 69, 34, 0.2));
+  transform: translate(-50%, -50%);
+}
+
+.defense-plant {
+  left: 28%;
+  top: 62%;
+  width: 28%;
+  opacity: 0.45;
+}
+
+.defense-yard.is-planted .defense-plant {
+  opacity: 1;
+  animation: plantPopIn 360ms ease both;
+}
+
+.defense-yard.is-attacking .defense-plant {
+  animation: plantAttackPulse 420ms ease;
+}
+
+.defense-zombie {
+  left: 75%;
+  top: 60%;
+  width: 25%;
+  transition:
+    transform 180ms ease,
+    filter 180ms ease;
+}
+
+.defense-zombie.is-hit {
+  transform: translate(-50%, -50%) rotate(-4deg);
+  filter: drop-shadow(0 12px 10px rgba(36, 69, 34, 0.2)) saturate(1.25);
+}
+
+.defense-zombie.is-falling {
+  transform: translate(-50%, -44%) rotate(18deg);
+}
+
+.defense-projectile {
+  position: absolute;
+  left: 32%;
+  top: 52%;
+  width: 64px;
+  height: 64px;
+  background: url("../assets/images/effects/pea_bullet.png") center / contain no-repeat;
+  opacity: 0;
+}
+
+.defense-yard.is-attacking .defense-projectile {
+  animation: defenseProjectileFly 560ms ease forwards;
+}
+
+.defense-sun-row {
+  position: absolute;
+  left: 4%;
+  top: 4%;
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.defense-sun-row span {
+  width: clamp(28px, 3.5vw, 42px);
+  aspect-ratio: 1 / 1;
+  background: url("../assets/images/objects/obj_sun.png") center / contain no-repeat;
+  opacity: 0.32;
+  filter: grayscale(0.35);
+}
+
+.defense-sun-row span.is-on {
+  opacity: 1;
+  filter: none;
+  animation: sunGainPop 360ms ease;
+}
+
+.defense-speak-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-18);
+  padding: var(--space-24);
+  border-radius: 28px;
+  background: rgba(255, 253, 242, 0.9);
+  box-shadow: var(--shadow-card);
+}
+
+.defense-speak-panel span {
+  color: var(--color-ink-700);
+  font-weight: 900;
+}
+
+.defense-speak-panel strong {
+  color: #2f6b37;
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  line-height: 1.05;
+  font-weight: 1000;
+}
+
+.primary-speak-action {
+  min-height: 76px;
+  background: linear-gradient(180deg, #ffe68b 0%, #ffc95d 100%);
+  color: #3f4f20;
+  font-size: 1.35rem;
+}
+
+@keyframes comicCellIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes memoryCardWrong {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(-5px);
+  }
+  60% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes plantPopIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -38%) scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes plantAttackPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-48%, -52%) scale(1.06);
+  }
+}
+
+@keyframes defenseProjectileFly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.7);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(360px, 20px) scale(1);
+  }
+}
+
+@keyframes sunGainPop {
+  from {
+    transform: scale(0.45);
+  }
+  to {
+    transform: scale(1);
+  }
+}

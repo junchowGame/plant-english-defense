@@ -1,3 +1,6 @@
+import { getLevelById } from "../data/levels.js";
+import { getLevelTargets } from "../systems/levelFlowSystem.js";
+
 const placementStorageKey = "plant-english-defense.yard-home.placements.v1";
 
 const defaultPlacements = {
@@ -34,6 +37,8 @@ function isNewCollectible(state, id) {
 export const homeScene = {
   render({ state }) {
     const nextLevel = state.save.unlockedLevel || 1;
+    const nextLevelData = getLevelById(nextLevel) ?? getLevelById(1);
+    const nextTargets = getLevelTargets(nextLevelData);
     const stickerNew = (state.save.newStickerIds?.length ?? 0) > 0;
     const hasPeashooter = hasCollectible(state, "collectible_peashooter");
     const hasBucket = hasCollectible(state, "collectible_bucket_zombie");
@@ -80,8 +85,8 @@ export const homeScene = {
 
         <section class="yard-next-panel" aria-label="下一关提示">
           <span>下一关</span>
-          <strong>第一关</strong>
-          <em>Hello / Hi / Good morning</em>
+          <strong>第 ${nextLevelData?.id ?? 1} 关</strong>
+          <em>${nextTargets.map((target) => target.label).join(" / ")}</em>
         </section>
 
         <div class="yard-primary-action">

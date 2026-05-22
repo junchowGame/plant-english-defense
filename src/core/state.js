@@ -32,7 +32,17 @@ export function createAppState() {
 export function createDefaultBattleState() {
   return {
     levelId: null,
+    phase: "memory",
     questionIndex: 0,
+    memoryRoundIndex: 0,
+    memoryCorrectCount: 0,
+    memoryWrongCount: 0,
+    comicStartedAt: 0,
+    comicAutoAdvanceDone: false,
+    defenseStep: 0,
+    sunCount: 0,
+    isPlanted: false,
+    isCompleting: false,
     feedback: "Ready! Tap the speaker to hear the task.",
     feedbackMood: "info",
     autoPlayedQuestionId: null,

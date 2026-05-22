@@ -14,6 +14,7 @@ import { createRouter } from "./router.js";
 import { getCurrentQuestion, evaluateDragQuestion, evaluateTapQuestion } from "./systems/questionSystem.js";
 import { completeLevel, markCollectibleViewed, markLearnedPhrases, markStickersViewed } from "./systems/rewardSystem.js";
 import { beginRecordingSession, finishRecordingSession } from "./systems/speakSystem.js";
+import { getDefensePrompt, getDefenseTotalSteps, getLevelTargets, getMemoryPrompt, getMemoryTotalRounds } from "./systems/levelFlowSystem.js";
 
 const scenes = {
   home: homeScene,
@@ -71,7 +72,14 @@ export function createApp(root) {
 
   function getQuestion() {
     const level = getCurrentLevel();
-    return getCurrentQuestion(level, store.getState().battle);
+    const battle = store.getState().battle;
+    if (battle.phase === "memory") {
+      return getMemoryPrompt(level, battle);
+    }
+    if (battle.phase === "defense") {
+      return getDefensePrompt(level, battle);
+    }
+    return getCurrentQuestion(level, battle);
   }
 
   function syncDebugHooks() {
@@ -81,9 +89,13 @@ export function createApp(root) {
       const question = getQuestion();
       return JSON.stringify({
         scene: state.scene,
+        phase: state.battle.phase,
         levelId: state.battle.levelId,
         questionId: question?.id ?? null,
         questionType: question?.type ?? null,
+        memoryProgress: `${Math.min(state.battle.memoryRoundIndex + 1, getMemoryTotalRounds())}/${getMemoryTotalRounds()}`,
+        defenseProgress: `${Math.min(state.battle.defenseStep + 1, getDefenseTotalSteps())}/${getDefenseTotalSteps()}`,
+        sunCount: state.battle.sunCount,
         feedback: state.battle.feedback,
         unlockedLevel: state.save.unlockedLevel,
         stickers: state.save.stickers?.length ?? 0,
@@ -92,7 +104,12 @@ export function createApp(root) {
         rewardModalOpen: Boolean(state.result?.newRewards?.length && !state.result?.rewardModalDismissed),
         speakModalOpen: state.battle.speakModalOpen,
         selectedDragItemId: state.battle.selectedDragItemId,
-        progress: `${state.battle.questionIndex + 1}/${level?.questions?.length ?? 0}`,
+        progress:
+          state.battle.phase === "memory"
+            ? `${Math.min(state.battle.memoryRoundIndex + 1, getMemoryTotalRounds())}/${getMemoryTotalRounds()}`
+            : state.battle.phase === "defense"
+              ? `${Math.min(state.battle.defenseStep + 1, getDefenseTotalSteps())}/${getDefenseTotalSteps()}`
+              : `${state.battle.questionIndex + 1}/${level?.questions?.length ?? 0}`,
         coordinateSystem: "percent-based positions with x from left to right and y from top to bottom",
       });
     };
@@ -108,6 +125,7 @@ export function createApp(root) {
     return {
       ...createDefaultBattleState(),
       levelId,
+      phase: "memory",
       feedback: uiText.feedback.ready,
     };
   }
@@ -148,20 +166,31 @@ export function createApp(root) {
     }));
   }
 
+  function finishLevel(level) {
+    const learnedPhraseIds = getLevelTargets(level).map((target) => target.phraseId);
+    const saveWithLearnedPhrases = markLearnedPhrases(store.getState().save, learnedPhraseIds);
+    const completed = completeLevel(saveWithLearnedPhrases, level);
+    persistCurrentSave(completed.save);
+    store.setState((current) => ({
+      ...current,
+      save: completed.save,
+      result: {
+        ...completed.result,
+        sunCount: current.battle.sunCount,
+        memoryCorrectCount: current.battle.memoryCorrectCount,
+        memoryWrongCount: current.battle.memoryWrongCount,
+      },
+    }));
+    openScene("result", { levelId: String(level.id) });
+  }
+
   function moveToNextQuestion() {
     const state = store.getState();
     const level = getCurrentLevel();
     const nextIndex = state.battle.questionIndex + 1;
 
     if (!level || nextIndex >= level.questions.length) {
-      const completed = completeLevel(state.save, level);
-      persistCurrentSave(completed.save);
-      store.setState((current) => ({
-        ...current,
-        save: completed.save,
-        result: completed.result,
-      }));
-      openScene("result", { levelId: String(level.id) });
+      finishLevel(level);
       return;
     }
 
@@ -181,6 +210,101 @@ export function createApp(root) {
       speakModalOpen: false,
       speakModalStatus: "idle",
     }));
+  }
+
+  function handleMemoryChoice(targetId) {
+    const state = store.getState();
+    const level = getCurrentLevel();
+    const prompt = getMemoryPrompt(level, state.battle);
+    if (state.battle.phase !== "memory" || !prompt) {
+      return;
+    }
+    if (targetId !== prompt.id) {
+      audio.playFeedback("retry");
+      setBattle((battle) => ({
+        ...battle,
+        memoryWrongCount: battle.memoryWrongCount + 1,
+        feedback: "听一听，再点对应图片。",
+        feedbackMood: "error",
+        isWrong: true,
+      }));
+      schedule(() => setBattle((battle) => ({ ...battle, isWrong: false })), 380);
+      return;
+    }
+
+    audio.playFeedback("success");
+    const nextRound = state.battle.memoryRoundIndex + 1;
+    const isDone = nextRound >= getMemoryTotalRounds();
+    setBattle((battle) => ({
+      ...battle,
+      memoryRoundIndex: nextRound,
+      memoryCorrectCount: battle.memoryCorrectCount + 1,
+      phase: isDone ? "comic" : "memory",
+      comicStartedAt: isDone ? Date.now() : battle.comicStartedAt,
+      comicAutoAdvanceDone: false,
+      autoPlayedQuestionId: null,
+      feedback: isDone ? "图片都认出来了，僵尸要来了。" : "答对了，继续听下一张。",
+      feedbackMood: "success",
+      isPlantGlow: true,
+    }));
+    schedule(() => setBattle((battle) => ({ ...battle, isPlantGlow: false })), 420);
+  }
+
+  function startDefensePhase() {
+    setBattle((battle) => {
+      if (battle.phase !== "comic") {
+        return battle;
+      }
+      return {
+        ...battle,
+        phase: "defense",
+        comicAutoAdvanceDone: true,
+        autoPlayedQuestionId: null,
+        feedback: "跟着说，植物就会守护小院。",
+        feedbackMood: "info",
+      };
+    });
+  }
+
+  function handleDefenseSpeak() {
+    const state = store.getState();
+    const level = getCurrentLevel();
+    if (state.battle.phase !== "defense" || state.battle.isCompleting || !level) {
+      return;
+    }
+    const prompt = getDefensePrompt(level, state.battle);
+    if (prompt?.phraseId) {
+      audio.playPhrase(prompt.phraseId, prompt.promptText);
+    } else {
+      audio.playFeedback("success");
+    }
+    const nextStep = state.battle.defenseStep + 1;
+    const isDone = nextStep >= getDefenseTotalSteps();
+    setBattle((battle) => ({
+      ...battle,
+      defenseStep: nextStep,
+      sunCount: Math.min(getDefenseTotalSteps(), battle.sunCount + 1),
+      isPlanted: true,
+      isAttacking: true,
+      isPlantGlow: true,
+      zombieHit: true,
+      isCompleting: isDone,
+      autoPlayedQuestionId: null,
+      feedback: isDone ? "守住小院了，看看这关奖励。" : nextStep === 1 ? "阳光落下，植物种好了。" : "说得好，植物攻击了。",
+      feedbackMood: "success",
+    }));
+    schedule(() => {
+      if (isDone) {
+        finishLevel(level);
+        return;
+      }
+      setBattle((battle) => ({
+        ...battle,
+        isAttacking: false,
+        isPlantGlow: false,
+        zombieHit: false,
+      }));
+    }, isDone ? 900 : 560);
   }
 
   function commitQuestionLearnedPhrases(question) {
@@ -316,6 +440,11 @@ export function createApp(root) {
 
   function completeSpeakQuestion() {
     const question = getQuestion();
+    if (store.getState().battle.phase === "defense") {
+      closeSpeakModal();
+      handleDefenseSpeak();
+      return;
+    }
     if (!question || question.type !== "speak") {
       return;
     }
@@ -630,6 +759,14 @@ export function createApp(root) {
         showStickerBookToast("继续守护，收集这张贴纸吧");
       } else if (action === "close-reward-modal") {
         closeRewardModal();
+      } else if (action === "memory-choice") {
+        handleMemoryChoice(target.dataset.targetId);
+      } else if (action === "skip-comic") {
+        startDefensePhase();
+      } else if (action === "defense-speak-success") {
+        handleDefenseSpeak();
+      } else if (action === "play-flow-prompt") {
+        playCurrentPrompt();
       } else if (action === "level-locked") {
         showLevelHint(target, "先完成前一关吧");
       } else if (action === "level-unavailable") {
@@ -691,6 +828,15 @@ export function createApp(root) {
     }, 180);
   }
 
+  function maybeAutoAdvanceComic() {
+    const state = store.getState();
+    if (state.scene !== "battle" || state.battle.phase !== "comic" || state.battle.comicAutoAdvanceDone) {
+      return;
+    }
+    setBattle((battle) => ({ ...battle, comicAutoAdvanceDone: true }));
+    schedule(startDefensePhase, 1800);
+  }
+
   function render() {
     const state = store.getState();
     const scene = scenes[state.scene] ?? homeScene;
@@ -700,6 +846,7 @@ export function createApp(root) {
     cleanupSceneBindings?.();
     cleanupSceneBindings = bindSceneEvents();
     maybeAutoPlayPrompt();
+    maybeAutoAdvanceComic();
     syncDebugHooks();
     events.emit("rendered", state.scene);
   }

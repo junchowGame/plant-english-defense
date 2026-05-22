@@ -62,6 +62,7 @@ export const resultScene = {
               <h2>${uiText.result.title}</h2>
               <p>${uiText.result.subtitle}</p>
               ${renderStars(result?.stars ?? 3)}
+              <p>本关阳光：${result?.sunCount ?? 5} / 5</p>
               <p>${uiText.result.stickerLabel}: ${sticker?.label ?? result?.stickerId ?? currentLevel?.rewardSticker}</p>
               <div class="result-actions">
                 ${MainButton({ label: uiText.result.next, action: "next-level", disabled: !hasNext })}
