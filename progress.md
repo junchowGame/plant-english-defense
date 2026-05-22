@@ -24,3 +24,4 @@ TODO
 - Confirm speech synthesis and microphone fallback behavior across Safari variants.
 - Added a `level-interaction.html?edit=1` in-page UI editor in progress: selectable `data-edit-id` targets, drag/resize geometry overrides, text/font edits, local image/background upload, and JSON import/export stored in localStorage.
 - Added the same editor capability to the main SPA behind `?edit=1`: auto-detects home, level select, battle, reward, and sticker-book UI targets; supports drag, resize, text edits, font size edits, local image/background upload, JSON export/import, and localStorage persistence.
+- Corrected the integration boundary: the four systems stay connected by the GDD flow, but the in-level interaction screen now uses the original MDD structure and assets again: loading -> picture click memory -> four-panel comic -> yard defense -> result panel.

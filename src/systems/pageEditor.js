@@ -11,6 +11,7 @@ const autoTargets = [
   [".memory-choice-card img, .memory-choice-card strong", "memory card"],
   [".comic-phase, .comic-grid, .comic-cell, .comic-phase p", "comic"],
   [".defense-yard, .defense-sky, .defense-plant, .defense-zombie, .defense-projectile, .defense-sun-row, .defense-speak-panel, .task-button-row", "defense"],
+  [".mdd-screen, .mdd-loading-copy, .mdd-load-ill, .mdd-load-panel, .mdd-top-hud, .mdd-context-panel, .mdd-card-row, .mdd-learn-card, .mdd-bottom-actions, .mdd-comic-strip, .mdd-comic-panel, .mdd-comic-caption, .mdd-yard-hud, .mdd-speak-panel, .mdd-yard-field, .mdd-slots, .mdd-slot, .mdd-sprite, .mdd-projectile, .mdd-sun-fly, .mdd-yard-actions, .mdd-result-panel, .mdd-result-stats, .mdd-result-actions", "mdd battle"],
   [".feedback-bar, .feedback-bar strong, .feedback-bar p", "feedback"],
   [".cmp-speak-modal, .speak-modal-card, .speak-sentence, .speak-status-badge, .modal-button-row, .modal-action-button", "speak modal"],
   [".result-panel, .result-summary, .result-actions, .reward-stage, .reward-modal, .reward-modal-panel, .reward-modal-title, .reward-modal-cards, .reward-modal-card, .reward-card-art, .reward-confirm-btn", "reward ui"],

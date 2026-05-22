@@ -1,6 +1,4 @@
 import { getLevelById } from "../data/levels.js";
-import { FeedbackBar } from "../ui/FeedbackBar.js";
-import { SpeakModal } from "../ui/SpeakModal.js";
 import {
   getDefensePrompt,
   getDefenseTotalSteps,
@@ -9,25 +7,38 @@ import {
   getMemoryTotalRounds,
 } from "../systems/levelFlowSystem.js";
 
-function renderTopbar(level, battle, audioText) {
-  const phaseText = battle.phase === "memory" ? "Listen and tap" : battle.phase === "comic" ? "Comic moment" : "Speak to defend";
-  const progressText =
-    battle.phase === "memory"
-      ? `${battle.memoryRoundIndex + 1}/${getMemoryTotalRounds()}`
-      : battle.phase === "defense"
-        ? `${battle.defenseStep + 1}/${getDefenseTotalSteps()}`
-        : "Comic";
+const ASSET = "./public/assets/level-interaction";
 
+const zombieHitSprite = {
+  2: "hit",
+  3: "shoes",
+  4: "pants",
+  5: "retreat",
+};
+
+function spriteStyle(fileName) {
+  return `background-image:url('${ASSET}/actions/${fileName}')`;
+}
+
+function renderExitButton(id) {
+  return `<button class="mdd-icon-btn mdd-exit-btn" data-action="pause-battle" data-edit-id="${id}" type="button" aria-label="Pause">Exit</button>`;
+}
+
+function renderLoading(level) {
   return `
-    <div class="battle-topbar unified-battle-topbar" data-edit-id="battle-topbar" data-edit-label="battle topbar">
-      <button class="icon-button" data-action="go-level-select" data-edit-id="battle-back-button" data-edit-label="battle back button" type="button" aria-label="Back to level map">Back</button>
-      <div class="battle-topbar-title" data-edit-id="battle-title-block" data-edit-label="battle title">
-        <strong data-edit-text="true">${level.title}</strong>
-        <span data-edit-text="true">${phaseText}</span>
+    <section class="mdd-screen mdd-loading" data-edit-id="battle-loading-screen" data-edit-label="loading screen">
+      ${renderExitButton("battle-loading-exit")}
+      <div class="mdd-loading-copy" data-edit-id="battle-loading-copy">
+        <p class="mdd-eyebrow" data-edit-id="battle-loading-level" data-edit-text="true">Level ${level.id}</p>
+        <h1 data-edit-id="battle-loading-title" data-edit-text="true">Plant English Defense</h1>
+        <p data-edit-id="battle-loading-desc" data-edit-text="true">Listen, tap, and use your voice to guard the yard.</p>
       </div>
-      <div class="unified-progress" data-edit-id="battle-progress" data-edit-label="battle progress">${progressText}</div>
-      <button class="icon-button" data-action="toggle-master-audio" data-edit-id="battle-audio-button" data-edit-label="battle audio button" type="button">${audioText}</button>
-    </div>
+      <img class="mdd-load-ill" data-edit-id="battle-loading-illustration" src="${ASSET}/ui/ui_load_ill_001.png" alt="" />
+      <div class="mdd-load-panel" data-edit-id="battle-loading-controls">
+        <div class="mdd-load-bar" aria-label="Loading progress"><span></span></div>
+        <button class="mdd-primary-btn" data-action="start-click" data-edit-id="battle-start-click-button" type="button">Start</button>
+      </div>
+    </section>
   `;
 }
 
@@ -36,23 +47,32 @@ function renderMemoryPhase(level, battle) {
   const options = getMemoryOptions(level, battle);
 
   return `
-    <section class="unified-level-flow memory-phase ${battle.isWrong ? "is-wrong" : ""}" data-edit-id="battle-memory-layout" data-edit-label="memory layout" aria-label="Listen and choose">
-      <div class="memory-prompt-panel" data-edit-id="battle-memory-prompt-panel" data-edit-label="memory prompt panel">
-        <span data-edit-id="battle-memory-helper" data-edit-label="memory helper" data-edit-text="true">Listen, then tap the matching picture.</span>
-        <strong data-edit-id="battle-memory-word" data-edit-label="memory phrase" data-edit-text="true">${prompt.promptText}</strong>
-        <button class="task-action-button" data-action="play-flow-prompt" data-edit-id="battle-memory-play-button" data-edit-label="memory play button" type="button">Play again</button>
+    <section class="mdd-screen mdd-click-game ${battle.isWrong ? "is-wrong" : ""}" data-edit-id="battle-click-screen" data-edit-label="picture click screen">
+      ${renderExitButton("battle-click-exit")}
+      <div class="mdd-top-hud" data-edit-id="battle-click-top-hud">
+        <div>
+          <p class="mdd-eyebrow" data-edit-id="battle-click-eyebrow" data-edit-text="true">Listen and choose</p>
+          <h2 data-edit-id="battle-click-prompt" data-edit-text="true">Choose: ${prompt.label}</h2>
+        </div>
+        <div class="mdd-progress-pill" data-edit-id="battle-click-progress">${battle.memoryRoundIndex + 1}/${getMemoryTotalRounds()}</div>
       </div>
-      <div class="memory-card-row" data-edit-id="battle-memory-card-row" data-edit-label="memory card row">
+      <div class="mdd-context-panel" data-edit-id="battle-click-context-panel">
+        <img data-edit-id="battle-click-context-image" src="${ASSET}/art/art_dialogue_thank_001.png" alt="" />
+      </div>
+      <div class="mdd-card-row" data-edit-id="battle-click-card-row" aria-live="polite">
         ${options
           .map(
-            (target) => `
-              <button class="memory-choice-card" data-action="memory-choice" data-target-id="${target.id}" data-edit-id="battle-memory-card-${target.id}" data-edit-label="memory card ${target.label}" type="button" aria-label="${target.label}">
-                <img src="${target.image}" data-edit-id="battle-memory-card-img-${target.id}" data-edit-label="memory image ${target.label}" alt="" aria-hidden="true" />
-                <strong data-edit-text="true">${target.label}</strong>
+            (target, index) => `
+              <button class="mdd-learn-card" style="animation-delay:${index * 70}ms" data-action="memory-choice" data-target-id="${target.id}" data-edit-id="battle-click-card-${target.id}" type="button" aria-label="${target.label}">
+                <img data-edit-id="battle-click-card-${target.id}-image" src="${target.image}" alt="${target.label}" />
+                <span data-edit-id="battle-click-card-${target.id}-label" data-edit-text="true">${target.label}</span>
               </button>
             `,
           )
           .join("")}
+      </div>
+      <div class="mdd-bottom-actions" data-edit-id="battle-click-bottom-actions">
+        <button class="mdd-round-btn" data-action="play-flow-prompt" data-edit-id="battle-click-replay-button" type="button" aria-label="Replay">Replay</button>
       </div>
     </section>
   `;
@@ -60,82 +80,120 @@ function renderMemoryPhase(level, battle) {
 
 function renderComicPhase() {
   return `
-    <section class="unified-level-flow comic-phase" data-edit-id="battle-comic-layout" data-edit-label="comic layout" aria-label="Transition comic">
-      <div class="comic-grid" data-edit-id="battle-comic-grid" data-edit-label="four panel comic" aria-hidden="true">
-        <div class="comic-cell plant-sun" data-edit-id="battle-comic-cell-1" data-edit-label="comic panel top left"><span data-edit-text="true">Plant in the sun</span></div>
-        <div class="comic-cell shadow" data-edit-id="battle-comic-cell-2" data-edit-label="comic panel top right"><span data-edit-text="true">A shadow appears</span></div>
-        <div class="comic-cell surprised" data-edit-id="battle-comic-cell-3" data-edit-label="comic panel bottom left"><span data-edit-text="true">Plant notices</span></div>
-        <div class="comic-cell ready" data-edit-id="battle-comic-cell-4" data-edit-label="comic panel bottom right"><span data-edit-text="true">Ready to defend</span></div>
+    <section class="mdd-screen mdd-comic" data-edit-id="battle-comic-screen" data-edit-label="comic screen">
+      ${renderExitButton("battle-comic-exit")}
+      <div class="mdd-comic-strip" data-edit-id="battle-comic-strip" aria-hidden="true">
+        <figure class="mdd-comic-panel panel-top-left" data-edit-id="battle-comic-frame-1">
+          <img data-edit-id="battle-comic-image-1" src="${ASSET}/art/art_comic_transition_grid_001_top_left.png" alt="" />
+        </figure>
+        <figure class="mdd-comic-panel panel-top-right" data-edit-id="battle-comic-frame-2">
+          <img data-edit-id="battle-comic-image-2" src="${ASSET}/art/art_comic_transition_grid_002_top_right.png" alt="" />
+        </figure>
+        <figure class="mdd-comic-panel panel-bottom-left" data-edit-id="battle-comic-frame-3">
+          <img data-edit-id="battle-comic-image-3" src="${ASSET}/art/art_comic_transition_grid_003_bottom_left.png" alt="" />
+        </figure>
+        <figure class="mdd-comic-panel panel-bottom-right" data-edit-id="battle-comic-frame-4">
+          <img data-edit-id="battle-comic-image-4" src="${ASSET}/art/art_comic_transition_grid_004_bottom_right.png" alt="" />
+        </figure>
       </div>
-      <p data-edit-id="battle-comic-caption" data-edit-label="comic caption" data-edit-text="true">The zombie is coming. Get ready to guard the yard.</p>
-      <button class="task-action-button" data-action="skip-comic" data-edit-id="battle-comic-start-button" data-edit-label="comic start button" type="button">Start defense</button>
+      <div class="mdd-comic-caption" data-edit-id="battle-comic-caption">
+        <h2 data-edit-id="battle-comic-title" data-edit-text="true">Your voice is ready. The yard is ready.</h2>
+        <button class="mdd-primary-btn" data-action="start-yard" data-edit-id="battle-start-yard-button" type="button">Go to yard</button>
+      </div>
     </section>
   `;
 }
 
-function renderSunRow(count) {
-  return `
-    <div class="defense-sun-row" data-edit-id="battle-defense-sun-row" data-edit-label="defense sun row" aria-label="Sun count">
-      ${Array.from({ length: getDefenseTotalSteps() }, (_, index) => `<span class="${index < count ? "is-on" : ""}"></span>`).join("")}
-    </div>
-  `;
+function renderSlots(battle) {
+  return Array.from({ length: 5 }, (_, index) => {
+    const isTarget = battle.plantPlacementPending ? " is-target" : "";
+    return `<button class="mdd-slot${isTarget}" data-action="place-plant" data-slot="${index}" data-edit-id="battle-yard-slot-${index + 1}" type="button" aria-label="Plant slot ${index + 1}"></button>`;
+  }).join("");
 }
 
 function renderDefensePhase(level, battle) {
   const prompt = getDefensePrompt(level, battle);
-  const zombieClass = battle.defenseStep >= 4 ? "is-falling" : battle.zombieHit ? "is-hit" : "";
+  const plantVisible = battle.defenseStep > 0 || battle.isPlanted || battle.plantPlacementPending;
+  const plantSprite = battle.plantPlacementPending
+    ? "ani_peashooter_spawn_001.png"
+    : battle.isAttacking
+      ? "ani_peashooter_attack_001.png"
+      : battle.isCompleting
+        ? "ani_peashooter_result_win_001.png"
+        : battle.isPlanted
+          ? "ani_peashooter_idle_001.png"
+          : "ani_peashooter_spawn_001.png";
+  const zombieSprite =
+    battle.isCompleting || battle.defenseStep >= getDefenseTotalSteps()
+      ? "ani_bucket_zombie_retreat_slide_001.png"
+      : battle.zombieHit
+        ? `ani_bucket_zombie_hit_${zombieHitSprite[battle.defenseStep] || "bucket"}_001.png`
+        : battle.defenseStep > 0
+          ? "ani_bucket_zombie_slow_walk_001.png"
+          : "ani_bucket_zombie_idle_wait_001.png";
 
   return `
-    <section class="unified-level-flow defense-phase" data-edit-id="battle-defense-layout" data-edit-label="defense layout" aria-label="Yard defense">
-      <div class="defense-yard ${battle.isAttacking ? "is-attacking" : ""} ${battle.isPlanted ? "is-planted" : ""}" data-edit-id="battle-defense-yard" data-edit-label="defense yard">
-        <div class="defense-sky" data-edit-id="battle-defense-sky" data-edit-label="defense sky"></div>
-        <img class="defense-plant" data-edit-id="battle-defense-plant" data-edit-label="defense plant" src="./assets/images/characters/char_plant_peashooter_${battle.isAttacking ? "attack" : "idle"}.png" alt="Peashooter" />
-        <img class="defense-zombie ${zombieClass}" data-edit-id="battle-defense-zombie" data-edit-label="defense zombie" src="./assets/images/characters/char_zombie_basic_${battle.zombieHit ? "hit" : "idle"}.png" alt="Zombie" />
-        <div class="defense-projectile" data-edit-id="battle-defense-projectile" data-edit-label="defense projectile" aria-hidden="true"></div>
-        ${renderSunRow(battle.sunCount)}
-      </div>
-      <aside class="defense-speak-panel" data-edit-id="battle-defense-speak-panel" data-edit-label="defense speak panel">
-        <span data-edit-id="battle-defense-helper" data-edit-label="defense helper" data-edit-text="true">${battle.defenseStep === 0 ? "First repeat plants the defense." : "Keep speaking to attack."}</span>
-        <strong data-edit-id="battle-defense-word" data-edit-label="defense phrase" data-edit-text="true">${prompt.promptText}</strong>
-        <div class="task-button-row" data-edit-id="battle-defense-button-row" data-edit-label="defense button row">
-          <button class="task-action-button" data-action="play-flow-prompt" data-edit-id="battle-defense-play-button" data-edit-label="defense play button" type="button">Play again</button>
-          <button class="task-action-button primary-speak-action" data-action="defense-speak-success" data-edit-id="battle-defense-speak-button" data-edit-label="defense speak button" type="button">I said it</button>
+    <section class="mdd-screen mdd-yard" data-edit-id="battle-yard-screen" data-edit-label="yard defense screen">
+      ${renderExitButton("battle-yard-exit")}
+      <div class="mdd-yard-hud" data-edit-id="battle-yard-hud">
+        <div class="mdd-sun-counter" data-edit-id="battle-sun-counter">
+          <img data-edit-id="battle-sun-icon" src="${ASSET}/art/icon_sys_sun_001_256.png" alt="" />
+          <span data-edit-id="battle-sun-count" data-edit-text="true">${battle.sunCount}</span>
         </div>
-      </aside>
+        <div class="mdd-repeat-count" data-edit-id="battle-speak-counter">Speak <span>${Math.min(battle.defenseStep, getDefenseTotalSteps())}</span>/${getDefenseTotalSteps()}</div>
+      </div>
+      <div class="mdd-speak-panel" data-edit-id="battle-speak-panel">
+        <p class="mdd-eyebrow" data-edit-id="battle-yard-eyebrow" data-edit-text="true">Say it aloud</p>
+        <h2 data-edit-id="battle-yard-prompt" data-edit-text="true">${battle.plantPlacementPending ? "Plant the peashooter." : `Say: ${prompt.label}!`}</h2>
+        <p data-edit-id="battle-yard-hint" data-edit-text="true">${battle.plantPlacementPending ? "Tap any grass slot to plant." : "Listen, then press the mic button."}</p>
+      </div>
+      <div class="mdd-yard-field" data-edit-id="battle-yard-field">
+        <div class="mdd-slots" data-edit-id="battle-yard-slots">${renderSlots(battle)}</div>
+        <div class="mdd-sprite mdd-plant-sprite ${plantVisible ? "" : "hidden"} ${battle.plantPlacementPending ? "draggable" : ""}" data-edit-id="battle-plant-sprite" style="${spriteStyle(plantSprite)}"></div>
+        <div class="mdd-sprite mdd-zombie-sprite ${battle.defenseStep === 0 ? "entering" : ""}" data-edit-id="battle-zombie-sprite" style="${spriteStyle(zombieSprite)}"></div>
+        <img class="mdd-projectile ${battle.isAttacking ? "fire" : "hidden"}" data-edit-id="battle-projectile" src="${ASSET}/art/icon_sys_projectile_001.png" alt="" />
+        <img class="mdd-sun-fly ${battle.isPlantGlow ? "collect" : "hidden"}" data-edit-id="battle-sun-fly" src="${ASSET}/art/icon_sys_sun_001_256.png" alt="" />
+      </div>
+      <div class="mdd-yard-actions" data-edit-id="battle-yard-actions">
+        <button class="mdd-round-btn small" data-action="play-flow-prompt" data-edit-id="battle-yard-replay-button" type="button" aria-label="Replay">Replay</button>
+        <button class="mdd-mic-btn ${battle.plantPlacementPending ? "" : "ready"}" data-action="defense-speak-success" data-edit-id="battle-mic-button" type="button" ${battle.plantPlacementPending ? "disabled" : ""} aria-label="Speak"></button>
+      </div>
     </section>
   `;
 }
 
+function renderPauseModal(battle) {
+  if (!battle.pauseOpen) return "";
+  return `
+    <div class="mdd-modal" role="dialog" aria-modal="true" aria-labelledby="battlePauseTitle">
+      <div class="mdd-modal-panel" data-edit-id="battle-pause-panel">
+        <h2 id="battlePauseTitle" data-edit-id="battle-pause-title" data-edit-text="true">Pause</h2>
+        <p data-edit-id="battle-pause-desc" data-edit-text="true">Leaving now will return to the level map.</p>
+        <div class="mdd-modal-actions" data-edit-id="battle-pause-actions">
+          <button class="mdd-secondary-btn" data-action="resume-battle" data-edit-id="battle-pause-resume-button" type="button">Continue</button>
+          <button class="mdd-primary-btn" data-action="go-level-select" data-edit-id="battle-pause-map-button" type="button">Map</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 export const battleScene = {
-  render({ state, uiText }) {
+  render({ state }) {
     const level = getLevelById(state.battle.levelId);
-    const question = getDefensePrompt(level, state.battle);
-    const audioText = state.save.settings.masterAudioEnabled ? "Audio" : "Muted";
-    const flowHtml =
-      state.battle.phase === "memory"
-        ? renderMemoryPhase(level, state.battle)
-        : state.battle.phase === "comic"
-          ? renderComicPhase()
-          : renderDefensePhase(level, state.battle);
+    const phaseHtml =
+      state.battle.phase === "loading"
+        ? renderLoading(level)
+        : state.battle.phase === "memory"
+          ? renderMemoryPhase(level, state.battle)
+          : state.battle.phase === "comic"
+            ? renderComicPhase()
+            : renderDefensePhase(level, state.battle);
 
     return `
-      <section class="page-shell scene-battle" data-page="page_battle" data-edit-id="battle-page" data-edit-label="battle page">
-        <div class="page-bg-decor" data-edit-id="battle-page-bg" data-edit-label="battle background"></div>
-        <div class="page-content" data-edit-id="battle-page-content" data-edit-label="battle content">
-          ${renderTopbar(level, state.battle, audioText)}
-          ${flowHtml}
-          ${FeedbackBar({
-            title:
-              state.battle.feedbackMood === "success"
-                ? "Nice!"
-                : state.battle.feedbackMood === "error"
-                  ? "Almost!"
-                  : "Garden Coach",
-            body: state.battle.feedback,
-            actionButtonHtml: '<button class="task-action-button" data-action="play-prompt">Play again</button>',
-          })}
-          ${SpeakModal({ question, battle: state.battle, uiText })}
-        </div>
+      <section class="page-shell scene-battle mdd-level-scene" data-page="page_battle" data-edit-id="battle-page" data-edit-label="MDD battle page">
+        ${phaseHtml}
+        ${renderPauseModal(state.battle)}
       </section>
     `;
   },

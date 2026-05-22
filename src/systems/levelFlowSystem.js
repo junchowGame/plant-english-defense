@@ -3,9 +3,9 @@ import { getStickerRewardByLevel } from "../data/rewards.js";
 
 const levelTargets = {
   1: [
-    { id: "hello", label: "Hello", phraseId: "hello", promptText: "Hello!", image: "./assets/images/reward_collection/art/ART_REWARD_STICKER_L01_001.png" },
-    { id: "hi", label: "Hi", phraseId: "hi", promptText: "Hi!", image: "./assets/images/reward_collection/art/ART_REWARD_STICKER_L01_001.png" },
-    { id: "good_morning", label: "Good morning", phraseId: "hello", promptText: "Good morning!", image: "./assets/images/characters/char_plant_sunflower_happy.png" },
+    { id: "hello", label: "Hello", phraseId: "hello", promptText: "Hello!", image: "./public/assets/level-interaction/art/art_learn_l01_hello_001.png" },
+    { id: "hi", label: "Hi", phraseId: "hi", promptText: "Hi!", image: "./public/assets/level-interaction/art/art_learn_l01_hi_001.png" },
+    { id: "good_morning", label: "Good morning", phraseId: "hello", promptText: "Good morning!", image: "./public/assets/level-interaction/art/art_learn_l01_good_morning_001.png" },
   ],
   2: [
     { id: "bye_bye", label: "Bye-bye", phraseId: "bye_bye", promptText: "Bye-bye!", image: "./assets/images/reward_collection/art/ART_REWARD_STICKER_L02_001.png" },

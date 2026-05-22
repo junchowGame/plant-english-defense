@@ -42,6 +42,8 @@ export function createDefaultBattleState() {
     defenseStep: 0,
     sunCount: 0,
     isPlanted: false,
+    plantPlacementPending: false,
+    pauseOpen: false,
     isCompleting: false,
     feedback: "Ready! Tap the speaker to hear the task.",
     feedbackMood: "info",

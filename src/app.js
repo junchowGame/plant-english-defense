@@ -127,7 +127,7 @@ export function createApp(root) {
     return {
       ...createDefaultBattleState(),
       levelId,
-      phase: "memory",
+      phase: "loading",
       feedback: uiText.feedback.ready,
     };
   }
@@ -262,6 +262,10 @@ export function createApp(root) {
         phase: "defense",
         comicAutoAdvanceDone: true,
         autoPlayedQuestionId: null,
+        isPlanted: false,
+        plantPlacementPending: false,
+        defenseStep: 0,
+        sunCount: 0,
         feedback: "跟着说，植物就会守护小院。",
         feedbackMood: "info",
       };
@@ -282,19 +286,25 @@ export function createApp(root) {
     }
     const nextStep = state.battle.defenseStep + 1;
     const isDone = nextStep >= getDefenseTotalSteps();
+    const needsPlantPlacement = nextStep === 1 && !state.battle.isPlanted;
     setBattle((battle) => ({
       ...battle,
       defenseStep: nextStep,
       sunCount: Math.min(getDefenseTotalSteps(), battle.sunCount + 1),
-      isPlanted: true,
-      isAttacking: true,
+      isPlanted: battle.isPlanted,
+      plantPlacementPending: needsPlantPlacement,
+      isAttacking: !needsPlantPlacement,
       isPlantGlow: true,
-      zombieHit: true,
+      zombieHit: !needsPlantPlacement,
       isCompleting: isDone,
       autoPlayedQuestionId: null,
-      feedback: isDone ? "守住小院了，看看这关奖励。" : nextStep === 1 ? "阳光落下，植物种好了。" : "说得好，植物攻击了。",
+      feedback: isDone ? "守住小院了，看看这关奖励。" : nextStep === 1 ? "阳光落下，把植物种到草地格里。" : "说得好，植物攻击了。",
       feedbackMood: "success",
     }));
+    if (needsPlantPlacement) {
+      schedule(() => setBattle((battle) => ({ ...battle, isPlantGlow: false })), 560);
+      return;
+    }
     schedule(() => {
       if (isDone) {
         finishLevel(level);
@@ -307,6 +317,35 @@ export function createApp(root) {
         zombieHit: false,
       }));
     }, isDone ? 900 : 560);
+  }
+
+  function startMemoryPhase() {
+    setBattle((battle) => ({
+      ...battle,
+      phase: "memory",
+      feedback: "听一听，点对应图片。",
+      feedbackMood: "info",
+      autoPlayedQuestionId: null,
+    }));
+  }
+
+  function placePlantInSlot() {
+    setBattle((battle) => {
+      if (!battle.plantPlacementPending) {
+        return battle;
+      }
+      return {
+        ...battle,
+        isPlanted: true,
+        plantPlacementPending: false,
+        feedback: "植物种好了，继续跟读来攻击。",
+        feedbackMood: "success",
+      };
+    });
+  }
+
+  function setBattlePause(open) {
+    setBattle((battle) => ({ ...battle, pauseOpen: open }));
   }
 
   function commitQuestionLearnedPhrases(question) {
@@ -761,12 +800,22 @@ export function createApp(root) {
         showStickerBookToast("继续守护，收集这张贴纸吧");
       } else if (action === "close-reward-modal") {
         closeRewardModal();
+      } else if (action === "start-click") {
+        startMemoryPhase();
       } else if (action === "memory-choice") {
         handleMemoryChoice(target.dataset.targetId);
       } else if (action === "skip-comic") {
         startDefensePhase();
+      } else if (action === "start-yard") {
+        startDefensePhase();
       } else if (action === "defense-speak-success") {
         handleDefenseSpeak();
+      } else if (action === "place-plant") {
+        placePlantInSlot();
+      } else if (action === "pause-battle") {
+        setBattlePause(true);
+      } else if (action === "resume-battle") {
+        setBattlePause(false);
       } else if (action === "play-flow-prompt") {
         playCurrentPrompt();
       } else if (action === "level-locked") {
@@ -817,7 +866,14 @@ export function createApp(root) {
 
   function maybeAutoPlayPrompt() {
     const state = store.getState();
-    if (state.scene !== "battle" || !state.save.settings.autoPlayPrompt) {
+    if (
+      state.scene !== "battle" ||
+      !state.save.settings.autoPlayPrompt ||
+      state.battle.phase === "loading" ||
+      state.battle.phase === "comic" ||
+      state.battle.pauseOpen ||
+      state.battle.plantPlacementPending
+    ) {
       return;
     }
     const question = getQuestion();
