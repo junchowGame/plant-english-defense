@@ -15,6 +15,7 @@ import { getCurrentQuestion, evaluateDragQuestion, evaluateTapQuestion } from ".
 import { completeLevel, markCollectibleViewed, markLearnedPhrases, markStickersViewed } from "./systems/rewardSystem.js";
 import { beginRecordingSession, finishRecordingSession } from "./systems/speakSystem.js";
 import { getDefensePrompt, getDefenseTotalSteps, getLevelTargets, getMemoryPrompt, getMemoryTotalRounds } from "./systems/levelFlowSystem.js";
+import { createPageEditor } from "./systems/pageEditor.js";
 
 const scenes = {
   home: homeScene,
@@ -33,6 +34,7 @@ export function createApp(root) {
   let cleanupSceneBindings = null;
   let pendingTimers = new Set();
   let recordingSession = null;
+  const pageEditor = createPageEditor(root);
 
   function cancelTimers() {
     pendingTimers.forEach((timerId) => window.clearTimeout(timerId));
@@ -845,6 +847,8 @@ export function createApp(root) {
     root.innerHTML = `<main class="app-frame">${scene.render({ state, uiText, currentLevel })}</main>`;
     cleanupSceneBindings?.();
     cleanupSceneBindings = bindSceneEvents();
+    pageEditor.apply();
+    pageEditor.refresh();
     maybeAutoPlayPrompt();
     maybeAutoAdvanceComic();
     syncDebugHooks();

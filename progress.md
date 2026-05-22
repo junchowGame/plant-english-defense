@@ -23,3 +23,4 @@ TODO
 - Re-run browser verification after any further drag/audio edits.
 - Confirm speech synthesis and microphone fallback behavior across Safari variants.
 - Added a `level-interaction.html?edit=1` in-page UI editor in progress: selectable `data-edit-id` targets, drag/resize geometry overrides, text/font edits, local image/background upload, and JSON import/export stored in localStorage.
+- Added the same editor capability to the main SPA behind `?edit=1`: auto-detects home, level select, battle, reward, and sticker-book UI targets; supports drag, resize, text edits, font size edits, local image/background upload, JSON export/import, and localStorage persistence.
