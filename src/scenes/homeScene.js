@@ -1,5 +1,4 @@
 const placementStorageKey = "plant-english-defense.yard-home.placements.v1";
-const stickerSeenStorageKey = "plant-english-defense.yard-home.sticker-seen.v1";
 
 const defaultPlacements = {
   peashooter: { x: 34, y: 55 },
@@ -19,23 +18,26 @@ function loadPlacements() {
   }
 }
 
-function isStickerNew() {
-  try {
-    return localStorage.getItem(stickerSeenStorageKey) !== "1";
-  } catch {
-    return true;
-  }
-}
-
 function posStyle(id) {
   const pos = loadPlacements()[id] ?? defaultPlacements[id];
   return `left:${pos.x}%; top:${pos.y}%;`;
 }
 
+function hasCollectible(state, id) {
+  return state.save.collectibles?.includes(id);
+}
+
+function isNewCollectible(state, id) {
+  return state.save.newCollectibleIds?.includes(id);
+}
+
 export const homeScene = {
   render({ state }) {
     const nextLevel = state.save.unlockedLevel || 1;
-    const stickerNew = isStickerNew();
+    const stickerNew = (state.save.newStickerIds?.length ?? 0) > 0;
+    const hasPeashooter = hasCollectible(state, "collectible_peashooter");
+    const hasBucket = hasCollectible(state, "collectible_bucket_zombie");
+    const hasAnyCollectible = hasPeashooter || hasBucket;
 
     return `
       <section class="page-shell scene-home yard-home" data-page="page_home" aria-label="庭院首页">
@@ -50,11 +52,23 @@ export const homeScene = {
           <span>Hello! 一起守护小院吧！</span>
         </button>
 
-        <div class="yard-shadow plant-shadow" style="${posStyle("peashooter")}"></div>
-        <img class="yard-object yard-character peashooter" data-home-drag="peashooter" data-idle-src="./assets/images/yard_home/home/art_char/art_home_peashooter_idle_001.png" data-drag-src="./assets/images/yard_home/home/art_char/art_home_peashooter_drag_001.png" src="./assets/images/yard_home/home/art_char/art_home_peashooter_idle_001.png" alt="豌豆射手" style="${posStyle("peashooter")}" />
+        ${
+          hasPeashooter
+            ? `
+              <div class="yard-shadow plant-shadow" style="${posStyle("peashooter")}"></div>
+              <img class="yard-object yard-character peashooter reward-collectible${isNewCollectible(state, "collectible_peashooter") ? " is-new-reward" : ""}" data-action="home-collectible-tap" data-home-drag="peashooter" data-idle-src="./assets/images/reward_collection/art/ART_REWARD_PEASHOOTER_COLLECTIBLE_001.png" data-drag-src="./assets/images/reward_collection/art/ART_REWARD_PEASHOOTER_COLLECTIBLE_001.png" src="./assets/images/reward_collection/art/ART_REWARD_PEASHOOTER_COLLECTIBLE_001.png" alt="豌豆射手收藏物" style="${posStyle("peashooter")}" />
+            `
+            : ""
+        }
 
-        <div class="yard-shadow zombie-shadow" style="${posStyle("bucket")}"></div>
-        <img class="yard-object yard-character bucket" data-home-drag="bucket" data-idle-src="./assets/images/yard_home/home/art_char/art_home_bucket_zombie_idle_001.png" data-drag-src="./assets/images/yard_home/home/art_char/art_home_bucket_zombie_drag_001.png" src="./assets/images/yard_home/home/art_char/art_home_bucket_zombie_idle_001.png" alt="铁桶僵尸访客" style="${posStyle("bucket")}" />
+        ${
+          hasBucket
+            ? `
+              <div class="yard-shadow zombie-shadow" style="${posStyle("bucket")}"></div>
+              <img class="yard-object yard-character bucket reward-collectible${isNewCollectible(state, "collectible_bucket_zombie") ? " is-new-reward" : ""}" data-action="home-collectible-tap" data-home-drag="bucket" data-idle-src="./assets/images/reward_collection/art/ART_REWARD_BUCKET_ZOMBIE_COLLECTIBLE_001.png" data-drag-src="./assets/images/reward_collection/art/ART_REWARD_BUCKET_ZOMBIE_COLLECTIBLE_001.png" src="./assets/images/reward_collection/art/ART_REWARD_BUCKET_ZOMBIE_COLLECTIBLE_001.png" alt="搞笑僵尸收藏物" style="${posStyle("bucket")}" />
+            `
+            : ""
+        }
 
         <img class="yard-object decor mailbox" data-home-drag="mailbox" src="./assets/images/yard_home/home/art_decor/art_home_decor_mailbox_001.png" alt="小邮箱" style="${posStyle("mailbox")}" />
         <img class="yard-object decor flag" data-home-drag="flag" src="./assets/images/yard_home/home/art_decor/art_home_decor_flag_001.png" alt="小太阳旗帜" style="${posStyle("flag")}" />
@@ -83,13 +97,19 @@ export const homeScene = {
           </button>
           <button class="yard-sticker-btn" data-action="home-open-stickers" aria-label="贴纸册">
             <span>贴纸册</span>
-            <img class="yard-new-badge${stickerNew ? "" : " hidden"}" src="./assets/images/yard_home/home/ui/badge/ui_home_sticker_badge_new_001.png" alt="新" />
+            <img class="yard-new-badge${stickerNew ? "" : " hidden"}" src="./assets/images/reward_collection/ui/UI_REWARD_HOME_BADGE_001.png" alt="新" />
           </button>
         </div>
 
         <div class="yard-status-panel" aria-live="polite">
-          <span>拖动植物和小装扮，布置自己的小院。</span>
+          <span>${hasAnyCollectible ? "拖动收藏伙伴，布置自己的小院。" : "完成第 5 关后，新的收藏伙伴会来到小院。"}</span>
         </div>
+
+        ${
+          state.save.newCollectibleIds?.length
+            ? `<div class="yard-new-collectible-bubble" aria-live="polite">新伙伴来小院啦</div>`
+            : ""
+        }
 
         <div class="yard-drop-ring" aria-hidden="true"></div>
         <div class="yard-toast hidden" aria-live="polite"></div>

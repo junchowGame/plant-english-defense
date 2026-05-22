@@ -6,17 +6,19 @@ import { levels, getLevelById } from "./data/levels.js";
 import { uiText } from "./data/uiText.js";
 import { homeScene } from "./scenes/homeScene.js";
 import { levelSelectScene } from "./scenes/levelSelectScene.js";
+import { stickerBookScene } from "./scenes/stickerBookScene.js";
 import { battleScene } from "./scenes/battleScene.js";
 import { resultScene } from "./scenes/resultScene.js";
 import { parentScene } from "./scenes/parentScene.js";
 import { createRouter } from "./router.js";
 import { getCurrentQuestion, evaluateDragQuestion, evaluateTapQuestion } from "./systems/questionSystem.js";
-import { completeLevel, markLearnedPhrases } from "./systems/rewardSystem.js";
+import { completeLevel, markCollectibleViewed, markLearnedPhrases, markStickersViewed } from "./systems/rewardSystem.js";
 import { beginRecordingSession, finishRecordingSession } from "./systems/speakSystem.js";
 
 const scenes = {
   home: homeScene,
   "level-select": levelSelectScene,
+  "sticker-book": stickerBookScene,
   battle: battleScene,
   result: resultScene,
   "parent-settings": parentScene,
@@ -84,6 +86,10 @@ export function createApp(root) {
         questionType: question?.type ?? null,
         feedback: state.battle.feedback,
         unlockedLevel: state.save.unlockedLevel,
+        stickers: state.save.stickers?.length ?? 0,
+        newStickers: state.save.newStickerIds?.length ?? 0,
+        collectibles: state.save.collectibles ?? [],
+        rewardModalOpen: Boolean(state.result?.newRewards?.length && !state.result?.rewardModalDismissed),
         speakModalOpen: state.battle.speakModalOpen,
         selectedDragItemId: state.battle.selectedDragItemId,
         progress: `${state.battle.questionIndex + 1}/${level?.questions?.length ?? 0}`,
@@ -385,6 +391,18 @@ export function createApp(root) {
     }, 1500);
   }
 
+  function showStickerBookToast(message) {
+    const pageRoot = root.querySelector(".stickerbook-page");
+    const toast = pageRoot?.querySelector(".stickerbook-toast");
+    if (!toast) {
+      return;
+    }
+    toast.textContent = message;
+    toast.classList.remove("hidden");
+    window.clearTimeout(showStickerBookToast.timer);
+    showStickerBookToast.timer = window.setTimeout(() => toast.classList.add("hidden"), 1300);
+  }
+
   function playHomeEncourage() {
     const text = "Hello! 一起守护小院吧！";
     if (!("speechSynthesis" in window)) {
@@ -399,14 +417,45 @@ export function createApp(root) {
     window.speechSynthesis.speak(utterance);
   }
 
-  function markStickerSeen() {
-    try {
-      localStorage.setItem("plant-english-defense.yard-home.sticker-seen.v1", "1");
-    } catch {
-      // localStorage may be unavailable in restricted browser contexts.
+  function openStickerBook() {
+    openScene("sticker-book");
+  }
+
+  function closeStickerBook() {
+    setSave((save) => markStickersViewed(save));
+    openScene("home");
+  }
+
+  function playSticker(target) {
+    const phraseId = target.dataset.phraseId;
+    const phraseText = target.dataset.phraseText;
+    if (phraseId) {
+      audio.playPhrase(phraseId, phraseText);
     }
-    root.querySelector(".yard-new-badge")?.classList.add("hidden");
-    showHomeToast("贴纸册还在准备中");
+  }
+
+  function closeRewardModal() {
+    store.setState((current) => ({
+      ...current,
+      result: {
+        ...current.result,
+        rewardModalDismissed: true,
+      },
+    }));
+  }
+
+  function collectibleIdForHomeDrag(id) {
+    if (id === "peashooter") return "collectible_peashooter";
+    if (id === "bucket") return "collectible_bucket_zombie";
+    return "";
+  }
+
+  function markHomeCollectibleViewed(homeDragId) {
+    const collectibleId = collectibleIdForHomeDrag(homeDragId);
+    if (!collectibleId || !store.getState().save.newCollectibleIds?.includes(collectibleId)) {
+      return;
+    }
+    setSave((save) => markCollectibleViewed(save, collectibleId));
   }
 
   function saveHomePlacement(id, x, y) {
@@ -502,6 +551,7 @@ export function createApp(root) {
       ring?.classList.add("hidden");
       if (isValidPlacement(left, top)) {
         saveHomePlacement(dragState.id, left, top);
+        markHomeCollectibleViewed(dragState.id);
         showHomeToast("摆好了");
       } else {
         setPairPosition(node, dragState.startLeft, dragState.startTop);
@@ -566,9 +616,20 @@ export function createApp(root) {
           startLevel(levelId);
         }
       } else if (action === "home-open-stickers") {
-        markStickerSeen();
+        openStickerBook();
       } else if (action === "home-play-encourage") {
         playHomeEncourage();
+      } else if (action === "home-collectible-tap") {
+        markHomeCollectibleViewed(target.dataset.homeDrag);
+        showHomeToast("收藏伙伴在小院里啦");
+      } else if (action === "close-stickerbook") {
+        closeStickerBook();
+      } else if (action === "play-sticker") {
+        playSticker(target);
+      } else if (action === "sticker-locked-hint") {
+        showStickerBookToast("继续守护，收集这张贴纸吧");
+      } else if (action === "close-reward-modal") {
+        closeRewardModal();
       } else if (action === "level-locked") {
         showLevelHint(target, "先完成前一关吧");
       } else if (action === "level-unavailable") {

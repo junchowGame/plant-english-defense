@@ -15,6 +15,7 @@ Original prompt: 你现在是这个项目的前端实现负责人，同时需要
 - Reworked drag again for real touch devices: drag cards now listen to pointer, touch, and mouse events on the capture phase, use pointer capture when available, and were verified with Chromium touch emulation from Task 1-2 to Task 1-3.
 - Replaced drag gameplay with tap-to-place: drag cards are now normal buttons, the player taps a card and then taps the glowing target zone. Verified Level 1 Task 1-2 advances to Task 1-3 with click-only input.
 - Replaced the level-select page with the new fixed 4:3 level selection system: 10 slots in a 5x2 grid, resource-backed background/panels/cards, current/cleared/locked/disabled states, reward badges on levels 5 and 10, and transient hints for locked or unavailable slots.
+- Added the reward collection system: first-clear sticker rewards, level 5/10 stage collectibles, result reward modal, sticker book route with 10 slots and voice playback, home sticker badge, and earned-only courtyard collectibles.
 
 TODO
 - Verify the full route flow in a browser.
