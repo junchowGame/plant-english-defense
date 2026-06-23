@@ -552,10 +552,11 @@
 @media (max-width: 760px) and (orientation: portrait) {
   .yard-encourage {
     left: 34%;
-    top: 25%;
+    top: 13%;
     width: 31%;
     height: 10.5%;
     z-index: 14;
+    font-size: 12px;
   }
 
   .yard-next-panel {
