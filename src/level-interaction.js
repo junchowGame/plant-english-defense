@@ -22,19 +22,19 @@ const targets = [
 ];
 
 const spriteAssets = {
-  "peashooter-idle": `${ASSET}/actions/ani_peashooter_idle_001.png`,
-  "peashooter-spawn": `${ASSET}/actions/ani_peashooter_spawn_001.png`,
-  "peashooter-planted": `${ASSET}/actions/ani_peashooter_planted_001.png`,
-  "peashooter-attack": `${ASSET}/actions/ani_peashooter_attack_001.png`,
-  "peashooter-win": `${ASSET}/actions/ani_peashooter_result_win_001.png`,
-  "bucket-spawn": `${ASSET}/actions/ani_bucket_zombie_spawn_stumble_001.png`,
-  "bucket-idle": `${ASSET}/actions/ani_bucket_zombie_idle_wait_001.png`,
-  "bucket-walk": `${ASSET}/actions/ani_bucket_zombie_slow_walk_001.png`,
-  "bucket-surprised": `${ASSET}/actions/ani_bucket_zombie_surprised_001.png`,
-  "bucket-hit": `${ASSET}/actions/ani_bucket_zombie_hit_bucket_001.png`,
-  "bucket-shoes": `${ASSET}/actions/ani_bucket_zombie_hit_shoes_001.png`,
-  "bucket-pants": `${ASSET}/actions/ani_bucket_zombie_hit_pants_001.png`,
-  "bucket-retreat": `${ASSET}/actions/ani_bucket_zombie_retreat_slide_001.png`,
+  "peashooter-idle": { src: `${ASSET}/actions/ani_peashooter_idle_001.png`, cols: 4, rows: 4, frames: 16 },
+  "peashooter-spawn": { src: `${ASSET}/actions/ani_peashooter_spawn_001.png`, cols: 5, rows: 2, frames: 10 },
+  "peashooter-planted": { src: `${ASSET}/actions/ani_peashooter_planted_001.png`, cols: 5, rows: 2, frames: 10 },
+  "peashooter-attack": { src: `${ASSET}/actions/ani_peashooter_attack_001.png`, cols: 3, rows: 2, frames: 6 },
+  "peashooter-win": { src: `${ASSET}/actions/ani_peashooter_result_win_001.png`, cols: 4, rows: 4, frames: 16 },
+  "bucket-spawn": { src: `${ASSET}/actions/ani_bucket_zombie_idle_wait_001.png`, cols: 4, rows: 4, frames: 16 },
+  "bucket-idle": { src: `${ASSET}/actions/ani_bucket_zombie_idle_wait_001.png`, cols: 4, rows: 4, frames: 16 },
+  "bucket-walk": { src: `${ASSET}/actions/ani_bucket_zombie_slow_walk_001.png`, cols: 6, rows: 4, frames: 24 },
+  "bucket-surprised": { src: `${ASSET}/actions/ani_bucket_zombie_surprised_001.png`, cols: 4, rows: 2, frames: 8 },
+  "bucket-hit": { src: `${ASSET}/actions/ani_bucket_zombie_hit_bucket_001.png`, cols: 4, rows: 4, frames: 16 },
+  "bucket-shoes": { src: `${ASSET}/actions/ani_bucket_zombie_hit_shoes_001.png`, cols: 4, rows: 4, frames: 16 },
+  "bucket-pants": { src: `${ASSET}/actions/ani_bucket_zombie_hit_pants_001.png`, cols: 7, rows: 3, frames: 21 },
+  "bucket-retreat": { src: `${ASSET}/actions/ani_bucket_zombie_retreat_slide_001.png`, cols: 7, rows: 4, frames: 28 },
 };
 
 const state = {
@@ -577,17 +577,22 @@ function finishLevel() {
 }
 
 function setSprite(node, key) {
+  const sprite = spriteAssets[key];
   node.dataset.sprite = key;
-  node.style.backgroundImage = `url("${spriteAssets[key]}")`;
+  node.style.backgroundImage = `url("${sprite.src}")`;
+  node.style.backgroundSize = `${sprite.cols * 100}% ${sprite.rows * 100}%`;
+  node.style.backgroundPosition = "0 0";
   node.dataset.frame = "0";
 }
 
 function animateSprites(time) {
-  const frame = Math.floor(time / 140) % 16;
   document.querySelectorAll(".sprite:not(.hidden)").forEach((node) => {
-    const x = frame % 4;
-    const y = Math.floor(frame / 4);
-    node.style.backgroundPosition = `${x * -100}% ${y * -100}%`;
+    const sprite = spriteAssets[node.dataset.sprite];
+    if (!sprite) return;
+    const frame = Math.floor(time / 140) % sprite.frames;
+    const x = frame % sprite.cols;
+    const y = Math.floor(frame / sprite.cols);
+    node.style.backgroundPosition = `${-x * node.clientWidth}px ${-y * node.clientHeight}px`;
   });
   requestAnimationFrame(animateSprites);
 }
@@ -955,7 +960,7 @@ startLoading();
 initEditor();
 requestAnimationFrame(animateSprites);
 
-Object.entries(spriteAssets).forEach(([, src]) => {
+Object.entries(spriteAssets).forEach(([, sprite]) => {
   const img = new Image();
-  img.src = src;
+  img.src = sprite.src;
 });
