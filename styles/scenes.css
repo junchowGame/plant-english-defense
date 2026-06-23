@@ -1,4 +1,4 @@
-.scene-home .page-content,
+﻿.scene-home .page-content,
 .scene-level-select .page-content,
 .scene-parent .page-content,
 .scene-result .page-content {
@@ -444,6 +444,20 @@
   font-weight: 900;
 }
 
+.yard-guard-btn span,
+.yard-map-btn span,
+.yard-sticker-btn span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .yard-guard-btn:active {
   background-image: url("../assets/images/yard_home/home/ui/btn/ui_home_guard_btn_pressed_001.png");
   transform: translateY(2px);
@@ -533,6 +547,83 @@
   height: 1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+}
+
+@media (max-width: 760px) and (orientation: portrait) {
+  .yard-encourage {
+    left: 34%;
+    top: 25%;
+    width: 31%;
+    height: 10.5%;
+    z-index: 14;
+  }
+
+  .yard-next-panel {
+    left: 7%;
+    top: 43.2%;
+    width: 72%;
+    height: 11%;
+    z-index: 17;
+    padding: 2.7% 7.2%;
+  }
+
+  .yard-primary-action {
+    left: 26%;
+    top: 29.4%;
+    width: 51%;
+    height: 13.4%;
+    z-index: 21;
+  }
+
+  .yard-guard-highlight {
+    inset: -6% -3%;
+    width: 106%;
+    height: 112%;
+  }
+
+  .yard-secondary-actions {
+    left: 12%;
+    top: 61.5%;
+    width: 72%;
+    height: 15%;
+    z-index: 23;
+    gap: 13%;
+  }
+
+  .yard-map-btn,
+  .yard-sticker-btn {
+    background-size: contain;
+  }
+
+  .yard-new-badge {
+    right: -3%;
+    top: -8%;
+    width: 28%;
+  }
+
+  .yard-status-panel {
+    left: 6%;
+    right: 6%;
+    bottom: 2.2%;
+    width: auto;
+    min-height: 7%;
+    padding: 2.4% 7%;
+    z-index: 28;
+  }
+
+  .sticker-sign {
+    left: 74%;
+    top: 77%;
+    width: 14%;
+    z-index: 6;
+  }
+
+  .birdhouse {
+    left: 79%;
+    top: 48%;
+    width: 12%;
+    z-index: 6;
+  }
 }
 
 .yard-drop-ring {
