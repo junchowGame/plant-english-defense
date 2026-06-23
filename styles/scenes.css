@@ -560,19 +560,19 @@
   }
 
   .yard-next-panel {
-    left: 7%;
-    top: 43.2%;
-    width: 72%;
-    height: 11%;
+    left: 64.5%;
+    top: 39.1%;
+    width: 25.4%;
+    height: 11.1%;
     z-index: 17;
-    padding: 2.7% 7.2%;
+    padding: 1.5% 2.2%;
   }
 
   .yard-primary-action {
-    left: 26%;
-    top: 29.4%;
-    width: 51%;
-    height: 13.4%;
+    left: 63%;
+    top: 22.1%;
+    width: 28.3%;
+    height: 14%;
     z-index: 21;
   }
 
@@ -583,12 +583,12 @@
   }
 
   .yard-secondary-actions {
-    left: 12%;
-    top: 61.5%;
-    width: 72%;
-    height: 15%;
+    left: 64.8%;
+    top: 54.7%;
+    width: 25.2%;
+    height: 11.1%;
     z-index: 23;
-    gap: 13%;
+    gap: 7%;
   }
 
   .yard-map-btn,
@@ -597,9 +597,9 @@
   }
 
   .yard-new-badge {
-    right: -3%;
-    top: -8%;
-    width: 28%;
+    right: -8%;
+    top: -14%;
+    width: 36%;
   }
 
   .yard-status-panel {
@@ -613,16 +613,16 @@
   }
 
   .sticker-sign {
-    left: 74%;
+    left: 81%;
     top: 77%;
-    width: 14%;
+    width: 17.6%;
     z-index: 6;
   }
 
   .birdhouse {
-    left: 79%;
-    top: 48%;
-    width: 12%;
+    left: 82%;
+    top: 47%;
+    width: 14.6%;
     z-index: 6;
   }
 }
